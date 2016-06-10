@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<products>
+	<product name="streaming-pool-ext-tensorics" version="0.0.1" directory="org/streaming-pool/streaming-pool-ext-tensorics">
+		<jar>streaming-pool-ext-tensorics.jar</jar>
+		<dependencies>
+			<dep product="log4j" />
+			<dep product="slf4j-api" />
+			<dep product="slf4j-log4j12" />
+
+			<dep product="spring-core" version="PRO" />
+			<dep product="spring-context" version="PRO" />
+			<dep product="spring-test" version="DEV" local="true" excluded="true" />
+
+			<dep product="streaming-pool-core" />
+
+			<dep product="junit" version="4.12" local="true" excluded="true" />
+			<dep product="assertj-core" version="1.6.0" local="true" excluded="true" />
+			<dep product="mockito-core" version="DEV" local="true" />
+		</dependencies>
+	</product>
+</products>
