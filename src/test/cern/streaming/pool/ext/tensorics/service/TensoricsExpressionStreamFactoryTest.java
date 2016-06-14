@@ -4,17 +4,23 @@
 
 package cern.streaming.pool.ext.tensorics.service;
 
+import static java.time.temporal.ChronoUnit.SECONDS;
 import static org.junit.Assert.*;
 import static org.tensorics.core.lang.DoubleTensorics.calculate;
 
+import java.time.Duration;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.concurrent.TimeUnit;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.test.context.ContextConfiguration;
+import org.tensorics.core.function.DiscreteFunction;
 import org.tensorics.core.lang.DoubleScript;
 import org.tensorics.core.lang.DoubleTensorics;
 import org.tensorics.core.lang.TensoricDoubleSupport;
+import org.tensorics.core.reduction.Averaging;
 import org.tensorics.core.tree.domain.Expression;
 
 import cern.streaming.pool.core.service.StreamId;
@@ -22,6 +28,7 @@ import cern.streaming.pool.core.service.support.RxStreamSupport;
 import cern.streaming.pool.core.testing.AbstractStreamTest;
 import cern.streaming.pool.core.util.ReactStreams;
 import cern.streaming.pool.ext.tensorics.conf.TensoricsStreamingConfiguration;
+import cern.streaming.pool.ext.tensorics.domain.BufferedStreamId;
 import cern.streaming.pool.ext.tensorics.domain.StreamIdBasedExpression;
 import cern.streaming.pool.ext.tensorics.support.TensoricsStreamSupport;
 import rx.Observable;
@@ -32,9 +39,13 @@ public class TensoricsExpressionStreamFactoryTest extends AbstractStreamTest
 
     private static final StreamId<Double> ID_A = ReactStreams.namedId("a");
     private static final StreamId<Double> ID_B = ReactStreams.namedId("b");
+    
+    private static final StreamId<DiscreteFunction<Instant, Double>> ID_F_A = new BufferedStreamId<>(ID_A, Duration.of(10, SECONDS)); 
 
     private static final Expression<Double> A = StreamIdBasedExpression.of(ID_A);
     private static final Expression<Double> B = StreamIdBasedExpression.of(ID_B);
+    
+    private static final Expression<DiscreteFunction<Instant, Double>> F_A = StreamIdBasedExpression.of(ID_F_A);
 
     @Before
     public void setUp() {
@@ -82,6 +93,12 @@ public class TensoricsExpressionStreamFactoryTest extends AbstractStreamTest
     public void shortTest() throws InterruptedException {
         rxFrom(calculate(A).plus(B)).subscribe((res) -> System.out.println("result=" + res));
         Thread.sleep(10000);
+    }
+    
+    
+    @Test
+    public void signalExpressionTry() {
+        //DoubleTensorics.averageOfF(F_A);
     }
 
 }
