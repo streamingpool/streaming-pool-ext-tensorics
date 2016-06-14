@@ -1,0 +1,77 @@
+/**
+ * Copyright (c) 2016 European Organisation for Nuclear Research (CERN), All Rights Reserved.
+ */
+
+package cern.streaming.pool.ext.tensorics.domain;
+
+import static java.util.Objects.requireNonNull;
+
+import java.util.Collections;
+import java.util.List;
+
+import org.tensorics.core.tree.domain.AbstractDeferredExpression;
+import org.tensorics.core.tree.domain.Node;
+
+import cern.streaming.pool.core.service.StreamId;
+
+/**
+ * An expression which can be used within the tensorics DSL which represents values which can be looked up from a stream
+ * in the streaming pool. This is always as leaf of the expression tree.
+ * 
+ * @author kfuchsbe
+ * @param <R> the return type of the expression (and thus the type of the values that the discovered stream will have to
+ *            produce)
+ */
+public class StreamIdBasedExpression<R> extends AbstractDeferredExpression<R> {
+
+    private final StreamId<R> streamId;
+
+    private StreamIdBasedExpression(StreamId<R> streamId) {
+        super();
+        this.streamId = requireNonNull(streamId, "streamId must not be null.");
+    }
+
+    public static <R> StreamIdBasedExpression<R> of(StreamId<R> streamId) {
+        return new StreamIdBasedExpression<R>(streamId);
+    }
+
+    @Override
+    public List<Node> getChildren() {
+        return Collections.emptyList();
+    }
+
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((streamId == null) ? 0 : streamId.hashCode());
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        StreamIdBasedExpression<?> other = (StreamIdBasedExpression<?>) obj;
+        if (streamId == null) {
+            if (other.streamId != null) {
+                return false;
+            }
+        } else if (!streamId.equals(other.streamId)) {
+            return false;
+        }
+        return true;
+    }
+
+    public StreamId<R> streamId() {
+        return streamId;
+    }
+
+}
