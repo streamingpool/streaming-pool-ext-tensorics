@@ -71,7 +71,7 @@ public class TensoricsExpressionStreamFactoryTest extends AbstractStreamTest
             }
         };
 
-        Observable<Boolean> resultingStream = rxFrom(check.getInternalExpression());
+        Observable<Boolean> resultingStream = rxFrom(check);
 
         DoubleScript<Double> sum = new DoubleScript<Double>() {
 
