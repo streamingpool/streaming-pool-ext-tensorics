@@ -17,6 +17,8 @@
 			<dep product="junit" version="4.12" local="true" excluded="true" />
 			<dep product="assertj-core" version="1.6.0" local="true" excluded="true" />
 			<dep product="mockito-core" version="DEV" local="true" />
+			<dep product="commons-lang3" local="true" excluded="true"/>
+			
 		</dependencies>
 	</product>
 </products>

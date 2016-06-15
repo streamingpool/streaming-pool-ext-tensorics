@@ -6,8 +6,6 @@ package cern.streaming.pool.ext.tensorics.domain;
 
 import static java.util.Objects.requireNonNull;
 
-import java.util.Objects;
-
 import org.tensorics.core.tree.domain.Expression;
 
 import cern.streaming.pool.core.service.StreamId;

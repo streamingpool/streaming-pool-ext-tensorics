@@ -34,17 +34,13 @@ import rx.functions.FuncN;
 
 public class TensoricsExpressionStreamFactory implements StreamFactory {
 
-    private static final FuncN<ResolvingContext> CONTEXT_COMBINER = new FuncN<ResolvingContext>() {
-
-        @Override
-        public ResolvingContext call(Object... entriesToCombine) {
-            EditableResolvingContext context = Contexts.newResolvingContext();
-            for (Object entry : entriesToCombine) {
-                ExpToValue castedEntry = (ExpToValue) entry;
-                context.put(castedEntry.node, castedEntry.value);
-            }
-            return context;
+    private static final FuncN<ResolvingContext> CONTEXT_COMBINER = (Object... entriesToCombine) -> {
+        EditableResolvingContext context = Contexts.newResolvingContext();
+        for (Object entry : entriesToCombine) {
+            ExpToValue castedEntry = (ExpToValue) entry;
+            context.put(castedEntry.node, castedEntry.value);
         }
+        return context;
     };
 
     private final ResolvingEngine engine = ResolvingEngines.defaultEngine();
@@ -54,7 +50,7 @@ public class TensoricsExpressionStreamFactory implements StreamFactory {
         if (!(id instanceof ExpressionBasedStreamId)) {
             return null;
         }
-        
+
         Expression<T> expression = ((ExpressionBasedStreamId<T>) id).expression();
 
         Collection<Node> leaves = Trees.findBottomNodes(expression);
@@ -65,7 +61,7 @@ public class TensoricsExpressionStreamFactory implements StreamFactory {
                 .collect(Collectors.toMap(exp -> exp, exp -> exp.streamId()));
 
         List<Observable<ExpToValue>> observableEntries = new ArrayList<>();
-        
+
         for (Entry<StreamIdBasedExpression<Object>, StreamId<Object>> entry : streamIds.entrySet()) {
             Observable<?> plainObservable = rxFrom(discoveryService.discover(entry.getValue()));
             Observable<ExpToValue> mappedObservable = plainObservable.map(obj -> (new ExpToValue(entry.getKey(), obj)));

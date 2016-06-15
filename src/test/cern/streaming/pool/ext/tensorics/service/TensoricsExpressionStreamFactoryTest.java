@@ -5,22 +5,19 @@
 package cern.streaming.pool.ext.tensorics.service;
 
 import static java.time.temporal.ChronoUnit.SECONDS;
-import static org.junit.Assert.*;
 import static org.tensorics.core.lang.DoubleTensorics.calculate;
 
 import java.time.Duration;
 import java.time.Instant;
-import java.time.temporal.ChronoUnit;
 import java.util.concurrent.TimeUnit;
 
+import org.apache.commons.lang3.tuple.Pair;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.test.context.ContextConfiguration;
 import org.tensorics.core.function.DiscreteFunction;
+import org.tensorics.core.function.lang.FunctionExpressionSupportWithConversion;
 import org.tensorics.core.lang.DoubleScript;
-import org.tensorics.core.lang.DoubleTensorics;
-import org.tensorics.core.lang.TensoricDoubleSupport;
-import org.tensorics.core.reduction.Averaging;
 import org.tensorics.core.tree.domain.Expression;
 
 import cern.streaming.pool.core.service.StreamId;
@@ -29,6 +26,7 @@ import cern.streaming.pool.core.testing.AbstractStreamTest;
 import cern.streaming.pool.core.util.ReactStreams;
 import cern.streaming.pool.ext.tensorics.conf.TensoricsStreamingConfiguration;
 import cern.streaming.pool.ext.tensorics.domain.BufferedStreamId;
+import cern.streaming.pool.ext.tensorics.domain.FunctionStreamId;
 import cern.streaming.pool.ext.tensorics.domain.StreamIdBasedExpression;
 import cern.streaming.pool.ext.tensorics.support.TensoricsStreamSupport;
 import rx.Observable;
@@ -39,13 +37,31 @@ public class TensoricsExpressionStreamFactoryTest extends AbstractStreamTest
 
     private static final StreamId<Double> ID_A = ReactStreams.namedId("a");
     private static final StreamId<Double> ID_B = ReactStreams.namedId("b");
-    
-    private static final StreamId<DiscreteFunction<Instant, Double>> ID_F_A = new BufferedStreamId<>(ID_A, Duration.of(10, SECONDS)); 
+
+    private static StreamId<Pair<Instant, Double>> ID_PAIRS_A = ReactStreams.namedId("VALUES_A");
+
+    private static BufferedStreamId<Pair<Instant, Double>> ID_PAIRS_A_BUFFERED = new BufferedStreamId<>(ID_PAIRS_A,
+            Duration.of(10, SECONDS));
+
+    private static final StreamId<DiscreteFunction<Instant, Double>> ID_PAIRS_A_FUNCTION = new FunctionStreamId<>(
+            ID_PAIRS_A_BUFFERED, Pair::getLeft, Pair::getRight);
+
+    private static StreamId<Pair<Instant, Double>> ID_PAIRS_B = ReactStreams.namedId("VALUES_B");
+
+    private static BufferedStreamId<Pair<Instant, Double>> ID_PAIRS_B_BUFFERED = new BufferedStreamId<>(ID_PAIRS_B,
+            Duration.of(10, SECONDS));
+
+    private static final StreamId<DiscreteFunction<Instant, Double>> ID_PAIRS_B_FUNCTION = new FunctionStreamId<>(
+            ID_PAIRS_B_BUFFERED, Pair::getLeft, Pair::getRight);
 
     private static final Expression<Double> A = StreamIdBasedExpression.of(ID_A);
     private static final Expression<Double> B = StreamIdBasedExpression.of(ID_B);
-    
-    private static final Expression<DiscreteFunction<Instant, Double>> F_A = StreamIdBasedExpression.of(ID_F_A);
+
+    private static final Expression<DiscreteFunction<Instant, Double>> FUNCTION_A = StreamIdBasedExpression
+            .of(ID_PAIRS_A_FUNCTION);
+
+    private static final Expression<DiscreteFunction<Instant, Double>> FUNCTION_B = StreamIdBasedExpression
+            .of(ID_PAIRS_B_FUNCTION);
 
     @Before
     public void setUp() {
@@ -54,6 +70,18 @@ public class TensoricsExpressionStreamFactoryTest extends AbstractStreamTest
 
         Observable<Double> tenToTwenty = Observable.interval(1500, TimeUnit.MILLISECONDS).map(Long::doubleValue);
         provide(tenToTwenty).as(ID_B);
+
+        final long startTime = System.currentTimeMillis();
+
+        Observable<Pair<Instant, Double>> valuesWithTimeStamp1 = Observable.interval(1, TimeUnit.SECONDS)
+                .map(d -> Pair.of(Instant.ofEpochMilli(startTime + d), d.doubleValue()));
+
+        Observable<Pair<Instant, Double>> valuesWithTimeStamp2 = Observable.interval(4, TimeUnit.SECONDS)
+                .map(d -> Pair.of(Instant.ofEpochMilli(startTime + d), d.doubleValue() + 33));
+
+        provide(valuesWithTimeStamp1).as(ID_PAIRS_A);
+
+        provide(valuesWithTimeStamp2).as(ID_PAIRS_B);
     }
 
     @Test
@@ -94,11 +122,29 @@ public class TensoricsExpressionStreamFactoryTest extends AbstractStreamTest
         rxFrom(calculate(A).plus(B)).subscribe((res) -> System.out.println("result=" + res));
         Thread.sleep(10000);
     }
-    
-    
+
     @Test
-    public void signalExpressionTry() {
-        //DoubleTensorics.averageOfF(F_A);
+    public void signalExpressionTry() throws InterruptedException {
+
+        DoubleScript<Double> check = new DoubleScript<Double>() {
+
+            @Override
+            protected Expression<Double> describe() {
+                FunctionExpressionSupportWithConversion<Instant, Double> supportWithConversion = withConversion(
+                        (Instant t) -> (double) t.toEpochMilli());
+
+                Expression<DiscreteFunction<Instant, Double>> difference = supportWithConversion.calculateF(FUNCTION_A)
+                        .minus(FUNCTION_B);
+
+                Expression<Double> averageOfF = supportWithConversion.averageOfF(difference);
+
+                return averageOfF;
+            }
+        };
+
+        rxFrom(check).subscribe((res) -> System.out.println("average=" + res));
+
+        Thread.sleep(1000000000);
     }
 
 }
