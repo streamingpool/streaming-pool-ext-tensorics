@@ -4,6 +4,8 @@
 
 package cern.streaming.pool.ext.tensorics.service;
 
+import java.util.List;
+
 import org.tensorics.core.commons.operations.Conversion;
 import org.tensorics.core.function.DiscreteFunction;
 import org.tensorics.core.function.MapBackedDiscreteFunction;
@@ -17,8 +19,14 @@ import cern.streaming.pool.ext.tensorics.domain.BufferedStreamId;
 import cern.streaming.pool.ext.tensorics.domain.FunctionStreamId;
 import rx.Observable;
 
+/**
+ * Creates streams of {@link DiscreteFunction}s by means of a {@link FunctionStreamId}
+ * 
+ * @author caguiler, kfuchsbe
+ */
 public class DiscreteFunctionStreamFactory implements StreamFactory {
 
+    @SuppressWarnings("unchecked")
     @Override
     public <T> ReactStream<T> create(StreamId<T> id, DiscoveryService discoveryService) {
         if (!(id instanceof FunctionStreamId)) {
@@ -35,12 +43,12 @@ public class DiscreteFunctionStreamFactory implements StreamFactory {
         Conversion<? super R, ? extends X> toX = id.getToX();
         Conversion<? super R, ? extends Y> toY = id.getToY();
 
-        Observable<Iterable<R>> buffered = ReactStreams.rxFrom(discoveryService.discover(sourceStream));
+        Observable<List<R>> buffered = ReactStreams.rxFrom(discoveryService.discover(sourceStream));
 
         Observable<DiscreteFunction<X, Y>> functions = buffered.map(iterable -> {
 
             MapBackedDiscreteFunction.Builder<X, Y> functionBuilder = MapBackedDiscreteFunction.builder();
-
+            
             for (R t : iterable) {
                 functionBuilder.put(toX.apply(t), toY.apply(t));
             }

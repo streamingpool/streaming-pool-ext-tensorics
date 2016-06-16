@@ -9,12 +9,27 @@ import org.tensorics.core.function.DiscreteFunction;
 
 import cern.streaming.pool.core.service.StreamId;
 
+/**
+ * A stream id used to transform items of a {@link BufferedStreamId} into a stream of {@link DiscreteFunction}
+ * 
+ * @author caguiler
+ * @param <T> Type of the {@link BufferedStreamId}
+ * @param <X> x values of the resulting {@link DiscreteFunction}
+ * @param <Y> y values of the resulting {@link DiscreteFunction}
+ */
 public class FunctionStreamId<T, X, Y> implements StreamId<DiscreteFunction<X, Y>> {
 
     private final BufferedStreamId<T> sourceStream;
     private final Conversion<? super T, ? extends X> toX;
     private final Conversion<? super T, ? extends Y> toY;
 
+    /**
+     * Builds a {@link FunctionStreamId}
+     * 
+     * @param sourceStream the {@link BufferedStreamId}
+     * @param toX converts T values into X values
+     * @param toY converts T values into Y values
+     */
     public FunctionStreamId(BufferedStreamId<T> sourceStream, Conversion<? super T, ? extends X> toX,
             Conversion<? super T, ? extends Y> toY) {
         super();
@@ -71,5 +86,5 @@ public class FunctionStreamId<T, X, Y> implements StreamId<DiscreteFunction<X, Y
             return false;
         return true;
     }
-    
+
 }

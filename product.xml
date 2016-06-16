@@ -12,7 +12,7 @@
 			<dep product="spring-test" version="DEV" local="true" excluded="true" />
 
 			<dep product="streaming-pool-core" />
-			<dep product="jscience" />
+			<dep product="tensorics-core" />
 
 			<dep product="junit" version="4.12" local="true" excluded="true" />
 			<dep product="assertj-core" version="1.6.0" local="true" excluded="true" />

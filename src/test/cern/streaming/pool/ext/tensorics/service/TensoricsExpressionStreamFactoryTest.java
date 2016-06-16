@@ -4,104 +4,94 @@
 
 package cern.streaming.pool.ext.tensorics.service;
 
-import static java.time.temporal.ChronoUnit.SECONDS;
-import static org.tensorics.core.lang.DoubleTensorics.calculate;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
+import static org.mockito.Mockito.when;
 
-import java.time.Duration;
-import java.time.Instant;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
-import org.apache.commons.lang3.tuple.Pair;
+import javax.management.RuntimeErrorException;
+
 import org.junit.Before;
 import org.junit.Test;
-import org.springframework.test.context.ContextConfiguration;
-import org.tensorics.core.function.DiscreteFunction;
-import org.tensorics.core.function.lang.FunctionExpressionSupportWithConversion;
+import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.mockito.runners.MockitoJUnitRunner;
 import org.tensorics.core.lang.DoubleScript;
 import org.tensorics.core.tree.domain.Expression;
 
+import cern.streaming.pool.core.service.DiscoveryService;
+import cern.streaming.pool.core.service.ReactStream;
 import cern.streaming.pool.core.service.StreamId;
-import cern.streaming.pool.core.service.support.RxStreamSupport;
-import cern.streaming.pool.core.testing.AbstractStreamTest;
 import cern.streaming.pool.core.util.ReactStreams;
-import cern.streaming.pool.ext.tensorics.conf.TensoricsStreamingConfiguration;
-import cern.streaming.pool.ext.tensorics.domain.BufferedStreamId;
-import cern.streaming.pool.ext.tensorics.domain.FunctionStreamId;
+import cern.streaming.pool.ext.tensorics.domain.ExpressionBasedStreamId;
 import cern.streaming.pool.ext.tensorics.domain.StreamIdBasedExpression;
-import cern.streaming.pool.ext.tensorics.support.TensoricsStreamSupport;
 import rx.Observable;
 
-@ContextConfiguration(classes = TensoricsStreamingConfiguration.class)
-public class TensoricsExpressionStreamFactoryTest extends AbstractStreamTest
-        implements RxStreamSupport, TensoricsStreamSupport {
+/**
+ * Unit tests for {@link TensoricsExpressionStreamFactory}
+ * 
+ * @author caguiler
+ */
+@RunWith(MockitoJUnitRunner.class)
+public class TensoricsExpressionStreamFactoryTest {
 
     private static final StreamId<Double> ID_A = ReactStreams.namedId("a");
     private static final StreamId<Double> ID_B = ReactStreams.namedId("b");
 
-    private static StreamId<Pair<Instant, Double>> ID_PAIRS_A = ReactStreams.namedId("VALUES_A");
-
-    private static BufferedStreamId<Pair<Instant, Double>> ID_PAIRS_A_BUFFERED = new BufferedStreamId<>(ID_PAIRS_A,
-            Duration.of(10, SECONDS));
-
-    private static final StreamId<DiscreteFunction<Instant, Double>> ID_PAIRS_A_FUNCTION = new FunctionStreamId<>(
-            ID_PAIRS_A_BUFFERED, Pair::getLeft, Pair::getRight);
-
-    private static StreamId<Pair<Instant, Double>> ID_PAIRS_B = ReactStreams.namedId("VALUES_B");
-
-    private static BufferedStreamId<Pair<Instant, Double>> ID_PAIRS_B_BUFFERED = new BufferedStreamId<>(ID_PAIRS_B,
-            Duration.of(10, SECONDS));
-
-    private static final StreamId<DiscreteFunction<Instant, Double>> ID_PAIRS_B_FUNCTION = new FunctionStreamId<>(
-            ID_PAIRS_B_BUFFERED, Pair::getLeft, Pair::getRight);
-
     private static final Expression<Double> A = StreamIdBasedExpression.of(ID_A);
     private static final Expression<Double> B = StreamIdBasedExpression.of(ID_B);
 
-    private static final Expression<DiscreteFunction<Instant, Double>> FUNCTION_A = StreamIdBasedExpression
-            .of(ID_PAIRS_A_FUNCTION);
+    private static final Expression<Double> A_PLUS_B = mockExpression();
 
-    private static final Expression<DiscreteFunction<Instant, Double>> FUNCTION_B = StreamIdBasedExpression
-            .of(ID_PAIRS_B_FUNCTION);
+    @Mock
+    private ExpressionBasedStreamId<Double> aPlusBstreamId;
+
+    @Mock
+    private DiscoveryService discoveryService;
+
+    @Mock
+    private TensoricsExpressionStreamFactory factoryUnderTest;
 
     @Before
     public void setUp() {
-        Observable<Double> oneToTen = Observable.interval(1, TimeUnit.SECONDS).map(Long::doubleValue);
-        provide(oneToTen).as(ID_A);
+        factoryUnderTest = new TensoricsExpressionStreamFactory();
+        when(aPlusBstreamId.getExpression()).thenReturn(A_PLUS_B);
 
-        Observable<Double> tenToTwenty = Observable.interval(1500, TimeUnit.MILLISECONDS).map(Long::doubleValue);
-        provide(tenToTwenty).as(ID_B);
+        Observable<Double> first = Observable.interval(1, TimeUnit.SECONDS).map( i -> (i+1)*10D).limit(3);
+        
 
-        final long startTime = System.currentTimeMillis();
+        ReactStream<Double> firstReact = ReactStreams.fromRx(first);
+        when(discoveryService.discover(ID_A)).thenReturn(firstReact);
 
-        Observable<Pair<Instant, Double>> valuesWithTimeStamp1 = Observable.interval(1, TimeUnit.SECONDS)
-                .map(d -> Pair.of(Instant.ofEpochMilli(startTime + d), d.doubleValue()));
+        Observable<Double> second =Observable.interval(2, TimeUnit.SECONDS).map( i -> 2.0).limit(3);
+        
+        ReactStream<Double> secondReact = ReactStreams.fromRx(second);
+        when(discoveryService.discover(ID_B)).thenReturn(secondReact);
+    }
 
-        Observable<Pair<Instant, Double>> valuesWithTimeStamp2 = Observable.interval(4, TimeUnit.SECONDS)
-                .map(d -> Pair.of(Instant.ofEpochMilli(startTime + d), d.doubleValue() + 33));
+  
 
-        provide(valuesWithTimeStamp1).as(ID_PAIRS_A);
-
-        provide(valuesWithTimeStamp2).as(ID_PAIRS_B);
+    @Test
+    public void testCreateReturnsNullWhenANonExpressionBasedStreamIdIsProvided() {
+        fail("Not yet implemented");
     }
 
     @Test
-    public void test() throws InterruptedException {
+    public void testCreate(){
+        ReactStream<Double> resolvedExpression = factoryUnderTest.create(aPlusBstreamId, discoveryService);
+   
+        List<Double> values = ReactStreams.rxFrom(resolvedExpression).toList().toBlocking().single();
+        
+        values.stream().forEach(System.out::println);
+        
+        assertEquals(3, values.size());
+    }
 
-        rxFrom(ID_A).subscribe((a) -> System.out.println("a=" + a));
-        rxFrom(ID_B).subscribe((b) -> System.out.println("b=" + b));
+    private static Expression<Double> mockExpression() {
 
-        DoubleScript<Boolean> check = new DoubleScript<Boolean>() {
-
-            @Override
-            protected Expression<Boolean> describe() {
-                Expression<Double> result = calculate(A).plus(B);
-                return testIf(result).isLessThan(8.0);
-            }
-        };
-
-        Observable<Boolean> resultingStream = rxFrom(check);
-
-        DoubleScript<Double> sum = new DoubleScript<Double>() {
+        return new DoubleScript<Double>() {
 
             @Override
             protected Expression<Double> describe() {
@@ -109,42 +99,14 @@ public class TensoricsExpressionStreamFactoryTest extends AbstractStreamTest
             }
         };
 
-        Observable<Double> sumStream = rxFrom(sum);
-
-        resultingStream.subscribe((res) -> System.out.println("lessThan(8.0)? " + res));
-        sumStream.subscribe((res) -> System.out.println("result=" + res));
-
-        Thread.sleep(10000);
     }
-
-    @Test
-    public void shortTest() throws InterruptedException {
-        rxFrom(calculate(A).plus(B)).subscribe((res) -> System.out.println("result=" + res));
-        Thread.sleep(10000);
-    }
-
-    @Test
-    public void signalExpressionTry() throws InterruptedException {
-
-        DoubleScript<Double> check = new DoubleScript<Double>() {
-
-            @Override
-            protected Expression<Double> describe() {
-                FunctionExpressionSupportWithConversion<Instant, Double> supportWithConversion = withConversion(
-                        (Instant t) -> (double) t.toEpochMilli());
-
-                Expression<DiscreteFunction<Instant, Double>> difference = supportWithConversion.calculateF(FUNCTION_A)
-                        .minus(FUNCTION_B);
-
-                Expression<Double> averageOfF = supportWithConversion.averageOfF(difference);
-
-                return averageOfF;
-            }
-        };
-
-        rxFrom(check).subscribe((res) -> System.out.println("average=" + res));
-
-        Thread.sleep(1000000000);
+    
+    private void safeSleep(long timeInMillis) {
+        try {
+            Thread.sleep(timeInMillis);
+        } catch (Exception e) {
+            throw new RuntimeException();
+        }
     }
 
 }

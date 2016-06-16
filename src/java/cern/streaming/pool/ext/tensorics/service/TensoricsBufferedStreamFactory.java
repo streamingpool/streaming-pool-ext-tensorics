@@ -16,6 +16,11 @@ import cern.streaming.pool.core.util.ReactStreams;
 import cern.streaming.pool.ext.tensorics.domain.BufferedStreamId;
 import rx.Observable;
 
+/**
+ * Creates non-overlapping buffers in the form of lists by means of a {@link BufferedStreamId}
+ * 
+ * @author caguiler, kfuchsbe
+ */
 public class TensoricsBufferedStreamFactory implements StreamFactory {
 
     @SuppressWarnings("unchecked")
@@ -27,20 +32,20 @@ public class TensoricsBufferedStreamFactory implements StreamFactory {
         }
 
         BufferedStreamId<T> bufferedStreamId = (BufferedStreamId<T>) id;
-        Observable<List<T>> buffered = bufferedStream(discoveryService, bufferedStreamId);
         
+        Observable<List<T>> buffered = bufferedStream(discoveryService, bufferedStreamId);
+
         return (ReactStream<T>) ReactStreams.fromRx(buffered);
     }
 
     private <R> Observable<List<R>> bufferedStream(DiscoveryService discoveryService,
             BufferedStreamId<R> bufferedStreamId) {
 
-        ReactStream<R> sourceStream = discoveryService.discover(bufferedStreamId.sourceStream());
+        ReactStream<R> sourceStream = discoveryService.discover(bufferedStreamId.getSourceStream());
 
-        Duration windowLength = bufferedStreamId.windowLength();
+        Duration windowLength = bufferedStreamId.getWindowLength();
 
-        return ReactStreams.rxFrom(sourceStream).buffer(windowLength.toNanos(),
-                TimeUnit.NANOSECONDS);
+        return ReactStreams.rxFrom(sourceStream).buffer(windowLength.toNanos(), TimeUnit.NANOSECONDS);
     }
-    
+
 }

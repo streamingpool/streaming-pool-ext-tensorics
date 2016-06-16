@@ -15,10 +15,10 @@ import org.tensorics.core.tree.domain.Node;
 import cern.streaming.pool.core.service.StreamId;
 
 /**
- * An expression which can be used within the tensorics DSL which represents values which can be looked up from a stream
- * in the streaming pool. This is always as leaf of the expression tree.
+ * An expression which can be used within the tensorics DSL. It represents values which can be looked up from a stream
+ * in the streaming pool. It is always a leaf of the expression tree.
  * 
- * @author kfuchsbe
+ * @author kfuchsbe, caguiler
  * @param <R> the return type of the expression (and thus the type of the values that the discovered stream will have to
  *            produce)
  */
@@ -32,7 +32,7 @@ public class StreamIdBasedExpression<R> extends AbstractDeferredExpression<R> {
     }
 
     public static <R> StreamIdBasedExpression<R> of(StreamId<R> streamId) {
-        return new StreamIdBasedExpression<R>(streamId);
+        return new StreamIdBasedExpression<>(streamId);
     }
 
     @Override

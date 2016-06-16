@@ -13,6 +13,11 @@ import cern.streaming.pool.core.util.ReactStreams;
 import cern.streaming.pool.ext.tensorics.domain.ExpressionBasedStreamId;
 import rx.Observable;
 
+/**
+ * Support interface for working with tensorics expressions and streams
+ * 
+ * @author kfuchsbe, caguiler
+ */
 public interface TensoricsStreamSupport extends StreamSupport {
 
     default <T> ReactStream<T> discover(Expression<T> expression) {
@@ -30,5 +35,4 @@ public interface TensoricsStreamSupport extends StreamSupport {
     default <T> Observable<T> rxFrom(TensoricScript<?, T> script) {
         return ReactStreams.rxFrom(discover(script));
     }
-
 }

@@ -32,6 +32,11 @@ import cern.streaming.pool.ext.tensorics.domain.StreamIdBasedExpression;
 import rx.Observable;
 import rx.functions.FuncN;
 
+
+/**
+ * 
+ * @author kfuchsbe, caguiler
+ */
 public class TensoricsExpressionStreamFactory implements StreamFactory {
 
     private static final FuncN<ResolvingContext> CONTEXT_COMBINER = (Object... entriesToCombine) -> {
@@ -43,7 +48,7 @@ public class TensoricsExpressionStreamFactory implements StreamFactory {
         return context;
     };
 
-    private final ResolvingEngine engine = ResolvingEngines.defaultEngine();
+    private static final ResolvingEngine ENGINE = ResolvingEngines.defaultEngine();
 
     @Override
     public <T> ReactStream<T> create(StreamId<T> id, DiscoveryService discoveryService) {
@@ -51,10 +56,11 @@ public class TensoricsExpressionStreamFactory implements StreamFactory {
             return null;
         }
 
-        Expression<T> expression = ((ExpressionBasedStreamId<T>) id).expression();
+        Expression<T> expression = ((ExpressionBasedStreamId<T>) id).getExpression();
 
         Collection<Node> leaves = Trees.findBottomNodes(expression);
 
+        @SuppressWarnings("unchecked")
         Map<StreamIdBasedExpression<Object>, StreamId<Object>> streamIds = leaves.stream()
                 .filter(node -> node instanceof StreamIdBasedExpression)
                 .map(node -> ((StreamIdBasedExpression<Object>) node))
@@ -69,7 +75,7 @@ public class TensoricsExpressionStreamFactory implements StreamFactory {
         }
 
         Observable<T> observable = Observable.combineLatest(observableEntries, CONTEXT_COMBINER)
-                .map(ctx -> engine.resolve(expression, ctx));
+                .map(ctx -> ENGINE.resolve(expression, ctx));
         return ReactStreams.fromRx(observable);
     }
 
@@ -83,7 +89,6 @@ public class TensoricsExpressionStreamFactory implements StreamFactory {
 
         private final StreamIdBasedExpression<Object> node;
         private final Object value;
-
     }
 
 }

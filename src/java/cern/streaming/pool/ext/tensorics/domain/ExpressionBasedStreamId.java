@@ -11,10 +11,10 @@ import org.tensorics.core.tree.domain.Expression;
 import cern.streaming.pool.core.service.StreamId;
 
 /**
- * A stream id, which is backed by a tensorics expression. This will be used to request a stream of it from the
- * streaming pool.
+ * A stream id backed by a tensorics expression. It can be used to request a stream of the expression
+ * (resolved) from the streaming pool.
  * 
- * @author kfuchsbe
+ * @author kfuchsbe, caguiler
  * @param <R> the return type of the expression (and thus the type of the elements of the resulting stream)
  */
 public class ExpressionBasedStreamId<R> implements StreamId<R> {
@@ -60,7 +60,7 @@ public class ExpressionBasedStreamId<R> implements StreamId<R> {
         return true;
     }
 
-    public Expression<R> expression() {
+    public Expression<R> getExpression() {
         return expression;
     }
 
