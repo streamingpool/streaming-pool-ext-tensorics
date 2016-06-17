@@ -20,9 +20,10 @@ import org.tensorics.core.lang.DoubleScript;
 import org.tensorics.core.tree.domain.Expression;
 
 import cern.streaming.pool.core.service.DiscoveryService;
-import cern.streaming.pool.core.service.ReactStream;
+import cern.streaming.pool.core.service.ReactiveStream;
 import cern.streaming.pool.core.service.StreamId;
-import cern.streaming.pool.core.util.ReactStreams;
+import cern.streaming.pool.core.service.util.ReactiveStreams;
+import cern.streaming.pool.core.testing.NamedStreamId;
 import cern.streaming.pool.ext.tensorics.domain.ExpressionBasedStreamId;
 import cern.streaming.pool.ext.tensorics.domain.StreamIdBasedExpression;
 import rx.Observable;
@@ -35,8 +36,8 @@ import rx.Observable;
 @RunWith(MockitoJUnitRunner.class)
 public class TensoricsExpressionStreamFactoryTest {
 
-    private static final StreamId<Double> ID_A = ReactStreams.namedId("a");
-    private static final StreamId<Double> ID_B = ReactStreams.namedId("b");
+    private static final StreamId<Double> ID_A = NamedStreamId.ofName("a");
+    private static final StreamId<Double> ID_B = NamedStreamId.ofName("b");
 
     private static final Expression<Double> A = StreamIdBasedExpression.of(ID_A);
     private static final Expression<Double> B = StreamIdBasedExpression.of(ID_B);
@@ -63,27 +64,27 @@ public class TensoricsExpressionStreamFactoryTest {
 
     private void mockStream1() {
         Observable<Double> first = Observable.interval(1, TimeUnit.SECONDS).map(i -> (i + 1) * 10D).limit(3);
-        ReactStream<Double> firstReact = ReactStreams.fromRx(first);
+        ReactiveStream<Double> firstReact = ReactiveStreams.fromRx(first);
         when(discoveryService.discover(ID_A)).thenReturn(firstReact);
     }
 
     private void mockStream2() {
         Observable<Double> second = Observable.interval(2, TimeUnit.SECONDS).map(i -> 2.0).limit(3);
-        ReactStream<Double> secondReact = ReactStreams.fromRx(second);
+        ReactiveStream<Double> secondReact = ReactiveStreams.fromRx(second);
         when(discoveryService.discover(ID_B)).thenReturn(secondReact);
     }
 
     @Test
     public void testCreateReturnsNullWhenANonExpressionBasedStreamIdIsProvided() {
-        ReactStream<?> stream = factoryUnderTest.create(ID_A, discoveryService);
+        ReactiveStream<?> stream = factoryUnderTest.create(ID_A, discoveryService);
         assertNull(stream);
     }
 
     @Test
     public void testCreate() {
-        ReactStream<Double> resolvedExpression = factoryUnderTest.create(expressionBasedStreamId, discoveryService);
+        ReactiveStream<Double> resolvedExpression = factoryUnderTest.create(expressionBasedStreamId, discoveryService);
 
-        List<Double> values = ReactStreams.rxFrom(resolvedExpression).toList().toBlocking().single();
+        List<Double> values = ReactiveStreams.rxFrom(resolvedExpression).toList().toBlocking().single();
 
         assertEquals(4, values.size());
     }

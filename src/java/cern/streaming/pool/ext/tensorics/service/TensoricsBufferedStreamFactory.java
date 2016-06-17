@@ -9,10 +9,10 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import cern.streaming.pool.core.service.DiscoveryService;
-import cern.streaming.pool.core.service.ReactStream;
+import cern.streaming.pool.core.service.ReactiveStream;
 import cern.streaming.pool.core.service.StreamFactory;
 import cern.streaming.pool.core.service.StreamId;
-import cern.streaming.pool.core.util.ReactStreams;
+import cern.streaming.pool.core.service.util.ReactiveStreams;
 import cern.streaming.pool.ext.tensorics.domain.BufferedStreamId;
 import rx.Observable;
 
@@ -25,7 +25,7 @@ public class TensoricsBufferedStreamFactory implements StreamFactory {
 
     @SuppressWarnings("unchecked")
     @Override
-    public <T> ReactStream<T> create(StreamId<T> id, DiscoveryService discoveryService) {
+    public <T> ReactiveStream<T> create(StreamId<T> id, DiscoveryService discoveryService) {
 
         if (!(id instanceof BufferedStreamId)) {
             return null;
@@ -35,18 +35,18 @@ public class TensoricsBufferedStreamFactory implements StreamFactory {
         
         Observable<List<T>> buffered = bufferedStream(discoveryService, bufferedStreamId);
 
-        return (ReactStream<T>) ReactStreams.fromRx(buffered);
+        return (ReactiveStream<T>) ReactiveStreams.fromRx(buffered);
     }
 
     private <R> Observable<List<R>> bufferedStream(DiscoveryService discoveryService,
             BufferedStreamId<R> bufferedStreamId) {
 
-        ReactStream<R> sourceStream = discoveryService.discover(bufferedStreamId.getSourceStream());
+        ReactiveStream<R> sourceStream = discoveryService.discover(bufferedStreamId.getSourceStream());
 
         Duration windowLength = bufferedStreamId.getWindowLength();
         
         ///XXX: Sliding window ??
-        return ReactStreams.rxFrom(sourceStream).buffer(windowLength.toNanos(),TimeUnit.NANOSECONDS);
+        return ReactiveStreams.rxFrom(sourceStream).buffer(windowLength.toNanos(),TimeUnit.NANOSECONDS);
     }
 
 }

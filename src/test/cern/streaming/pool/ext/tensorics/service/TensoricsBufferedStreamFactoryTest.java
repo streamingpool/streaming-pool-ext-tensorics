@@ -19,10 +19,10 @@ import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
 import cern.streaming.pool.core.service.DiscoveryService;
-import cern.streaming.pool.core.service.ReactStream;
+import cern.streaming.pool.core.service.ReactiveStream;
 import cern.streaming.pool.core.service.StreamId;
-import cern.streaming.pool.core.service.impl.NamedStreamId;
-import cern.streaming.pool.core.util.ReactStreams;
+import cern.streaming.pool.core.service.util.ReactiveStreams;
+import cern.streaming.pool.core.testing.NamedStreamId;
 import cern.streaming.pool.ext.tensorics.domain.BufferedStreamId;
 import rx.Observable;
 
@@ -60,7 +60,7 @@ public class TensoricsBufferedStreamFactoryTest {
 
     @Test
     public void testCreate() {
-        ReactStream<List<Integer>> createdStream = factoryUnderTest.create(bufferedStreamId, discoveryService);
+        ReactiveStream<List<Integer>> createdStream = factoryUnderTest.create(bufferedStreamId, discoveryService);
 
         verify(bufferedStreamId).getSourceStream();
         verify(bufferedStreamId).getWindowLength();
@@ -70,12 +70,12 @@ public class TensoricsBufferedStreamFactoryTest {
 
     @Test
     public void testCreateReturnsNullWhenANonBufferedStreamIdIsProvided() {
-        ReactStream<?> createdStream = factoryUnderTest.create(invalidStreamId, discoveryService);
+        ReactiveStream<?> createdStream = factoryUnderTest.create(invalidStreamId, discoveryService);
         assertNull(createdStream);
     }
 
     private void mockDiscoveryService() {
-        ReactStream<Integer> stream = ReactStreams.fromRx(Observable.just(1));
+        ReactiveStream<Integer> stream = ReactiveStreams.fromRx(Observable.just(1));
         when(discoveryService.discover(streamId)).thenReturn(stream);
     }
 

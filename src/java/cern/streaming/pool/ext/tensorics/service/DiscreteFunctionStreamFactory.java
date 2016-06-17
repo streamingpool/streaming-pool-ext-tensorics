@@ -11,10 +11,10 @@ import org.tensorics.core.function.DiscreteFunction;
 import org.tensorics.core.function.MapBackedDiscreteFunction;
 
 import cern.streaming.pool.core.service.DiscoveryService;
-import cern.streaming.pool.core.service.ReactStream;
+import cern.streaming.pool.core.service.ReactiveStream;
 import cern.streaming.pool.core.service.StreamFactory;
 import cern.streaming.pool.core.service.StreamId;
-import cern.streaming.pool.core.util.ReactStreams;
+import cern.streaming.pool.core.service.util.ReactiveStreams;
 import cern.streaming.pool.ext.tensorics.domain.BufferedStreamId;
 import cern.streaming.pool.ext.tensorics.domain.FunctionStreamId;
 import rx.Observable;
@@ -28,22 +28,22 @@ public class DiscreteFunctionStreamFactory implements StreamFactory {
 
     @SuppressWarnings("unchecked")
     @Override
-    public <T> ReactStream<T> create(StreamId<T> id, DiscoveryService discoveryService) {
+    public <T> ReactiveStream<T> create(StreamId<T> id, DiscoveryService discoveryService) {
         if (!(id instanceof FunctionStreamId)) {
             return null;
         }
 
-        return (ReactStream<T>) createFunctionStream((FunctionStreamId<?, ?, ?>) id, discoveryService);
+        return (ReactiveStream<T>) createFunctionStream((FunctionStreamId<?, ?, ?>) id, discoveryService);
     }
 
-    <R, X, Y> ReactStream<DiscreteFunction<X, Y>> createFunctionStream(FunctionStreamId<R, X, Y> id,
+    <R, X, Y> ReactiveStream<DiscreteFunction<X, Y>> createFunctionStream(FunctionStreamId<R, X, Y> id,
             DiscoveryService discoveryService) {
 
         BufferedStreamId<R> sourceStream = id.getSourceStream();
         Conversion<? super R, ? extends X> toX = id.getToX();
         Conversion<? super R, ? extends Y> toY = id.getToY();
 
-        Observable<List<R>> buffered = ReactStreams.rxFrom(discoveryService.discover(sourceStream));
+        Observable<List<R>> buffered = ReactiveStreams.rxFrom(discoveryService.discover(sourceStream));
 
         Observable<DiscreteFunction<X, Y>> functions = buffered.map(iterable -> {
 
@@ -56,6 +56,6 @@ public class DiscreteFunctionStreamFactory implements StreamFactory {
             return functionBuilder.build();
         });
 
-        return ReactStreams.fromRx(functions);
+        return ReactiveStreams.fromRx(functions);
     }
 }

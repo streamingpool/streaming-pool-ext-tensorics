@@ -4,7 +4,8 @@
 
 package cern.streaming.pool.ext.tensorics.service;
 
-import static cern.streaming.pool.core.util.ReactStreams.rxFrom;
+
+import static cern.streaming.pool.core.service.util.ReactiveStreams.rxFrom;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -23,10 +24,10 @@ import org.tensorics.core.tree.domain.ResolvingContext;
 import org.tensorics.core.tree.walking.Trees;
 
 import cern.streaming.pool.core.service.DiscoveryService;
-import cern.streaming.pool.core.service.ReactStream;
+import cern.streaming.pool.core.service.ReactiveStream;
 import cern.streaming.pool.core.service.StreamFactory;
 import cern.streaming.pool.core.service.StreamId;
-import cern.streaming.pool.core.util.ReactStreams;
+import cern.streaming.pool.core.service.util.ReactiveStreams;
 import cern.streaming.pool.ext.tensorics.domain.ExpressionBasedStreamId;
 import cern.streaming.pool.ext.tensorics.domain.StreamIdBasedExpression;
 import rx.Observable;
@@ -51,7 +52,7 @@ public class TensoricsExpressionStreamFactory implements StreamFactory {
     private static final ResolvingEngine ENGINE = ResolvingEngines.defaultEngine();
 
     @Override
-    public <T> ReactStream<T> create(StreamId<T> id, DiscoveryService discoveryService) {
+    public <T> ReactiveStream<T> create(StreamId<T> id, DiscoveryService discoveryService) {
         if (!(id instanceof ExpressionBasedStreamId)) {
             return null;
         }
@@ -76,7 +77,7 @@ public class TensoricsExpressionStreamFactory implements StreamFactory {
 
         Observable<T> observable = Observable.combineLatest(observableEntries, CONTEXT_COMBINER)
                 .map(ctx -> ENGINE.resolve(expression, ctx));
-        return ReactStreams.fromRx(observable);
+        return ReactiveStreams.fromRx(observable);
     }
 
     private static final class ExpToValue {
