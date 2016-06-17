@@ -11,7 +11,7 @@ import java.util.Objects;
 import cern.streaming.pool.core.service.StreamId;
 
 /**
- * Stream id useful to look up a stream of buffered values of <code>R</code>. THe buffer length can be tuned by a
+ * Stream id useful to look up a stream of buffered values of <code>R</code>. The buffer length can be tuned by a
  * Duration.
  * <p>
  * If no buffer length is given it is set to 1 second by default.

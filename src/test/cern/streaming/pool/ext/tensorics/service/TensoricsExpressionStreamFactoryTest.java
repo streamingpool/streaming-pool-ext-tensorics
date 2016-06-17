@@ -11,8 +11,6 @@ import static org.mockito.Mockito.when;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
-import javax.management.RuntimeErrorException;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -46,7 +44,7 @@ public class TensoricsExpressionStreamFactoryTest {
     private static final Expression<Double> A_PLUS_B = mockExpression();
 
     @Mock
-    private ExpressionBasedStreamId<Double> aPlusBstreamId;
+    private ExpressionBasedStreamId<Double> expressionBasedStreamId;
 
     @Mock
     private DiscoveryService discoveryService;
@@ -57,21 +55,23 @@ public class TensoricsExpressionStreamFactoryTest {
     @Before
     public void setUp() {
         factoryUnderTest = new TensoricsExpressionStreamFactory();
-        when(aPlusBstreamId.getExpression()).thenReturn(A_PLUS_B);
+        when(expressionBasedStreamId.getExpression()).thenReturn(A_PLUS_B);
 
-        Observable<Double> first = Observable.interval(1, TimeUnit.SECONDS).map( i -> (i+1)*10D).limit(3);
-        
+        mockStream1();
+        mockStream2();
+    }
 
+    private void mockStream1() {
+        Observable<Double> first = Observable.interval(1, TimeUnit.SECONDS).map(i -> (i + 1) * 10D).limit(3);
         ReactStream<Double> firstReact = ReactStreams.fromRx(first);
         when(discoveryService.discover(ID_A)).thenReturn(firstReact);
+    }
 
-        Observable<Double> second =Observable.interval(2, TimeUnit.SECONDS).map( i -> 2.0).limit(3);
-        
+    private void mockStream2() {
+        Observable<Double> second = Observable.interval(2, TimeUnit.SECONDS).map(i -> 2.0).limit(3);
         ReactStream<Double> secondReact = ReactStreams.fromRx(second);
         when(discoveryService.discover(ID_B)).thenReturn(secondReact);
     }
-
-  
 
     @Test
     public void testCreateReturnsNullWhenANonExpressionBasedStreamIdIsProvided() {
@@ -79,14 +79,12 @@ public class TensoricsExpressionStreamFactoryTest {
     }
 
     @Test
-    public void testCreate(){
-        ReactStream<Double> resolvedExpression = factoryUnderTest.create(aPlusBstreamId, discoveryService);
-   
+    public void testCreate() {
+        ReactStream<Double> resolvedExpression = factoryUnderTest.create(expressionBasedStreamId, discoveryService);
+
         List<Double> values = ReactStreams.rxFrom(resolvedExpression).toList().toBlocking().single();
-        
-        values.stream().forEach(System.out::println);
-        
-        assertEquals(3, values.size());
+
+        assertEquals(4, values.size());
     }
 
     private static Expression<Double> mockExpression() {
@@ -99,14 +97,6 @@ public class TensoricsExpressionStreamFactoryTest {
             }
         };
 
-    }
-    
-    private void safeSleep(long timeInMillis) {
-        try {
-            Thread.sleep(timeInMillis);
-        } catch (Exception e) {
-            throw new RuntimeException();
-        }
     }
 
 }

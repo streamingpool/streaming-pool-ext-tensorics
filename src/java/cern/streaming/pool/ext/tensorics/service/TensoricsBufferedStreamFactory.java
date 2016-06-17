@@ -44,8 +44,9 @@ public class TensoricsBufferedStreamFactory implements StreamFactory {
         ReactStream<R> sourceStream = discoveryService.discover(bufferedStreamId.getSourceStream());
 
         Duration windowLength = bufferedStreamId.getWindowLength();
-
-        return ReactStreams.rxFrom(sourceStream).buffer(windowLength.toNanos(), TimeUnit.NANOSECONDS);
+        
+        ///XXX: Sliding window ??
+        return ReactStreams.rxFrom(sourceStream).buffer(windowLength.toNanos(),TimeUnit.NANOSECONDS);
     }
 
 }
