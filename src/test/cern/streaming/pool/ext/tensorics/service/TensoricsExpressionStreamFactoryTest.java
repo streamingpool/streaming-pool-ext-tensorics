@@ -5,7 +5,7 @@
 package cern.streaming.pool.ext.tensorics.service;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
+import static org.junit.Assert.assertNull;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
@@ -75,7 +75,8 @@ public class TensoricsExpressionStreamFactoryTest {
 
     @Test
     public void testCreateReturnsNullWhenANonExpressionBasedStreamIdIsProvided() {
-        fail("Not yet implemented");
+        ReactStream<?> stream = factoryUnderTest.create(ID_A, discoveryService);
+        assertNull(stream);
     }
 
     @Test
