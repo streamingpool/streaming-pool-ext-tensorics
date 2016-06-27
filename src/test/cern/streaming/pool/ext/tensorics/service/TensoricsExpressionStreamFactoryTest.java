@@ -63,13 +63,13 @@ public class TensoricsExpressionStreamFactoryTest {
     }
 
     private void mockStream1() {
-        Observable<Double> first = Observable.interval(1, TimeUnit.SECONDS).map(i -> (i + 1) * 10D).limit(3);
+        Observable<Double> first = Observable.interval(100, TimeUnit.MILLISECONDS).map(i -> (i + 1) * 10D).limit(3);
         ReactiveStream<Double> firstReact = ReactiveStreams.fromRx(first);
         when(discoveryService.discover(ID_A)).thenReturn(firstReact);
     }
 
     private void mockStream2() {
-        Observable<Double> second = Observable.interval(2, TimeUnit.SECONDS).map(i -> 2.0).limit(3);
+        Observable<Double> second = Observable.interval(77, TimeUnit.MILLISECONDS).map(i -> 2.0).limit(3);
         ReactiveStream<Double> secondReact = ReactiveStreams.fromRx(second);
         when(discoveryService.discover(ID_B)).thenReturn(secondReact);
     }
@@ -86,7 +86,7 @@ public class TensoricsExpressionStreamFactoryTest {
 
         List<Double> values = ReactiveStreams.rxFrom(resolvedExpression).toList().toBlocking().single();
 
-        assertEquals(4, values.size());
+        assertEquals(5, values.size());
     }
 
     private static Expression<Double> mockExpression() {
