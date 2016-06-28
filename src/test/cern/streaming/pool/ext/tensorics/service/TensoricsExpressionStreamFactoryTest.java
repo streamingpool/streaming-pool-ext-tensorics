@@ -17,6 +17,8 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.tensorics.core.lang.DoubleScript;
+import org.tensorics.core.resolve.domain.DetailedResolved;
+import org.tensorics.core.resolve.engine.ResolvingEngines;
 import org.tensorics.core.tree.domain.Expression;
 
 import cern.streaming.pool.core.service.DiscoveryService;
@@ -24,6 +26,7 @@ import cern.streaming.pool.core.service.ReactiveStream;
 import cern.streaming.pool.core.service.StreamId;
 import cern.streaming.pool.core.service.util.ReactiveStreams;
 import cern.streaming.pool.core.testing.NamedStreamId;
+import cern.streaming.pool.ext.tensorics.domain.DetailedExpressionStreamId;
 import cern.streaming.pool.ext.tensorics.domain.ExpressionBasedStreamId;
 import cern.streaming.pool.ext.tensorics.domain.StreamIdBasedExpression;
 import rx.Observable;
@@ -45,17 +48,16 @@ public class TensoricsExpressionStreamFactoryTest {
     private static final Expression<Double> A_PLUS_B = mockExpression();
 
     @Mock
-    private ExpressionBasedStreamId<Double> expressionBasedStreamId;
+    private DetailedExpressionStreamId<Double, Expression<Double>> expressionBasedStreamId;
 
     @Mock
     private DiscoveryService discoveryService;
 
-    @Mock
-    private TensoricsExpressionStreamFactory factoryUnderTest;
+    private DetailedTensoricsExpressionStreamFactory factoryUnderTest;
 
     @Before
     public void setUp() {
-        factoryUnderTest = new TensoricsExpressionStreamFactory();
+        factoryUnderTest = new DetailedTensoricsExpressionStreamFactory(ResolvingEngines.defaultEngine());
         when(expressionBasedStreamId.getExpression()).thenReturn(A_PLUS_B);
 
         mockStream1();
@@ -82,9 +84,11 @@ public class TensoricsExpressionStreamFactoryTest {
 
     @Test
     public void testCreate() {
-        ReactiveStream<Double> resolvedExpression = factoryUnderTest.create(expressionBasedStreamId, discoveryService);
+        ReactiveStream<DetailedResolved<Double, Expression<Double>>> resolvedExpression = factoryUnderTest
+                .create(expressionBasedStreamId, discoveryService);
 
-        List<Double> values = ReactiveStreams.rxFrom(resolvedExpression).toList().toBlocking().single();
+        List<Double> values = ReactiveStreams.rxFrom(resolvedExpression).map(DetailedResolved::value).toList()
+                .toBlocking().single();
 
         assertEquals(5, values.size());
     }

@@ -6,27 +6,21 @@ package cern.streaming.pool.ext.tensorics.domain;
 
 import static java.util.Objects.requireNonNull;
 
+import org.tensorics.core.resolve.domain.DetailedResolved;
 import org.tensorics.core.tree.domain.Expression;
 
 import cern.streaming.pool.core.service.StreamId;
 
-/**
- * A stream id backed by a tensorics expression. It can be used to request a stream of the expression (resolved) from
- * the streaming pool.
- * 
- * @author kfuchsbe, caguiler
- * @param <R> the return type of the expression (and thus the type of the elements of the resulting stream)
- */
-public class ExpressionBasedStreamId<R> implements StreamId<R> {
+public class DetailedExpressionStreamId<R, E extends Expression<R>> implements StreamId<DetailedResolved<R, E>> {
 
-    private final DetailedExpressionStreamId<R,?> expression;
+    private final E expression;
 
-    private ExpressionBasedStreamId(Expression<R> expression) {
-        this.expression = DetailedExpressionStreamId.of(requireNonNull(expression, "expression must not be null."));
+    private DetailedExpressionStreamId(E expression) {
+        this.expression = requireNonNull(expression, "expression must not be null.");
     }
 
-    public static <R> ExpressionBasedStreamId<R> of(Expression<R> expression) {
-        return new ExpressionBasedStreamId<>(expression);
+    public static <R, E extends Expression<R>> DetailedExpressionStreamId<R, E> of(E expression) {
+        return new DetailedExpressionStreamId<>(expression);
     }
 
     @Override
@@ -48,7 +42,7 @@ public class ExpressionBasedStreamId<R> implements StreamId<R> {
         if (getClass() != obj.getClass()) {
             return false;
         }
-        ExpressionBasedStreamId<?> other = (ExpressionBasedStreamId<?>) obj;
+        DetailedExpressionStreamId<?, ?> other = (DetailedExpressionStreamId<?, ?>) obj;
         if (expression == null) {
             if (other.expression != null) {
                 return false;
@@ -59,8 +53,7 @@ public class ExpressionBasedStreamId<R> implements StreamId<R> {
         return true;
     }
 
-    public DetailedExpressionStreamId<R,?> getDetailedId() {
+    public E getExpression() {
         return expression;
     }
-
 }
