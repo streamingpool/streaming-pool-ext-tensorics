@@ -4,7 +4,9 @@
 
 package cern.streaming.pool.ext.tensorics.service;
 
+import static cern.streaming.pool.core.service.util.ReactiveStreams.fromRx;
 import static cern.streaming.pool.core.service.util.ReactiveStreams.rxFrom;
+import static rx.Observable.combineLatest;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -13,10 +15,8 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.stream.Collectors;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.tensorics.core.resolve.domain.DetailedResolved;
 import org.tensorics.core.resolve.engine.ResolvingEngine;
-import org.tensorics.core.resolve.engine.ResolvingEngines;
 import org.tensorics.core.tree.domain.Contexts;
 import org.tensorics.core.tree.domain.EditableResolvingContext;
 import org.tensorics.core.tree.domain.Expression;
@@ -28,9 +28,7 @@ import cern.streaming.pool.core.service.DiscoveryService;
 import cern.streaming.pool.core.service.ReactiveStream;
 import cern.streaming.pool.core.service.StreamFactory;
 import cern.streaming.pool.core.service.StreamId;
-import cern.streaming.pool.core.service.util.ReactiveStreams;
 import cern.streaming.pool.ext.tensorics.domain.DetailedExpressionStreamId;
-import cern.streaming.pool.ext.tensorics.domain.ExpressionBasedStreamId;
 import cern.streaming.pool.ext.tensorics.domain.StreamIdBasedExpression;
 import rx.Observable;
 import rx.functions.FuncN;
@@ -55,18 +53,17 @@ public class DetailedTensoricsExpressionStreamFactory implements StreamFactory {
         this.engine = engine;
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public <T> ReactiveStream<T> create(StreamId<T> id, DiscoveryService discoveryService) {
         if (!(id instanceof DetailedExpressionStreamId)) {
             return null;
         }
-        return (ReactiveStream<T>) ReactiveStreams
-                .fromRx(streamFor((DetailedExpressionStreamId<?, ?>) id, discoveryService));
+        return (ReactiveStream<T>) fromRx(resolvedStream((DetailedExpressionStreamId<?, ?>) id, discoveryService));
     }
 
-    private <T, E extends Expression<T>> Observable<DetailedResolved<T, E>> streamFor(
+    private <T, E extends Expression<T>> Observable<DetailedResolved<T, E>> resolvedStream(
             DetailedExpressionStreamId<T, E> id, DiscoveryService discoveryService) {
-
         E expression = id.getExpression();
 
         Collection<Node> leaves = Trees.findBottomNodes(expression);
@@ -85,9 +82,7 @@ public class DetailedTensoricsExpressionStreamFactory implements StreamFactory {
             observableEntries.add(mappedObservable);
         }
 
-        return Observable.combineLatest(observableEntries, CONTEXT_COMBINER)
-                .map(ctx -> engine.resolveDetailed(expression, ctx));
-
+        return combineLatest(observableEntries, CONTEXT_COMBINER).map(ctx -> engine.resolveDetailed(expression, ctx));
     }
 
     private static final class ExpToValue {

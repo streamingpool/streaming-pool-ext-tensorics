@@ -11,6 +11,13 @@ import org.tensorics.core.tree.domain.Expression;
 
 import cern.streaming.pool.core.service.StreamId;
 
+/**
+ * A {@link StreamId} that encapsulates an {@link Expression} and provides detailed information about its resolution (
+ * {@link DetailedResolved}).
+ * 
+ * @param <R> the type of the data the source expression resolves
+ * @param <E> the type of the expression that is wrapped
+ */
 public class DetailedExpressionStreamId<R, E extends Expression<R>> implements StreamId<DetailedResolved<R, E>> {
 
     private final E expression;
@@ -21,6 +28,10 @@ public class DetailedExpressionStreamId<R, E extends Expression<R>> implements S
 
     public static <R, E extends Expression<R>> DetailedExpressionStreamId<R, E> of(E expression) {
         return new DetailedExpressionStreamId<>(expression);
+    }
+
+    public E getExpression() {
+        return expression;
     }
 
     @Override
@@ -53,7 +64,8 @@ public class DetailedExpressionStreamId<R, E extends Expression<R>> implements S
         return true;
     }
 
-    public E getExpression() {
-        return expression;
+    @Override
+    public String toString() {
+        return "DetailedExpressionStreamId [expression=" + expression + "]";
     }
 }

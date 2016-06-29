@@ -19,7 +19,7 @@ import cern.streaming.pool.core.service.StreamId;
  */
 public class ExpressionBasedStreamId<R> implements StreamId<R> {
 
-    private final DetailedExpressionStreamId<R,?> expression;
+    private final DetailedExpressionStreamId<R, ?> expression;
 
     private ExpressionBasedStreamId(Expression<R> expression) {
         this.expression = DetailedExpressionStreamId.of(requireNonNull(expression, "expression must not be null."));
@@ -27,6 +27,10 @@ public class ExpressionBasedStreamId<R> implements StreamId<R> {
 
     public static <R> ExpressionBasedStreamId<R> of(Expression<R> expression) {
         return new ExpressionBasedStreamId<>(expression);
+    }
+
+    public DetailedExpressionStreamId<R, ?> getDetailedId() {
+        return expression;
     }
 
     @Override
@@ -59,8 +63,9 @@ public class ExpressionBasedStreamId<R> implements StreamId<R> {
         return true;
     }
 
-    public DetailedExpressionStreamId<R,?> getDetailedId() {
-        return expression;
+    @Override
+    public String toString() {
+        return "ExpressionBasedStreamId [expression=" + expression + "]";
     }
 
 }

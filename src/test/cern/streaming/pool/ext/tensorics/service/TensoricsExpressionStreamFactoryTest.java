@@ -27,7 +27,6 @@ import cern.streaming.pool.core.service.StreamId;
 import cern.streaming.pool.core.service.util.ReactiveStreams;
 import cern.streaming.pool.core.testing.NamedStreamId;
 import cern.streaming.pool.ext.tensorics.domain.DetailedExpressionStreamId;
-import cern.streaming.pool.ext.tensorics.domain.ExpressionBasedStreamId;
 import cern.streaming.pool.ext.tensorics.domain.StreamIdBasedExpression;
 import rx.Observable;
 
