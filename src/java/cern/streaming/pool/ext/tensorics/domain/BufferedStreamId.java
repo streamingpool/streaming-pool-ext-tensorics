@@ -30,7 +30,7 @@ public class BufferedStreamId<R> implements StreamId<List<R>> {
      * @param sourceStream stream id to buffer
      */
     public BufferedStreamId(StreamId<R> sourceStream) {
-        this(sourceStream, Duration.ofSeconds(1));
+        this(sourceStream, Duration.ofMillis(1500));
     }
 
     /**
