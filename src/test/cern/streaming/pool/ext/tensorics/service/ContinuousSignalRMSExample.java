@@ -23,6 +23,7 @@ import cern.streaming.pool.core.service.StreamId;
 import cern.streaming.pool.core.support.RxStreamSupport;
 import cern.streaming.pool.core.testing.AbstractStreamTest;
 import cern.streaming.pool.core.testing.NamedStreamId;
+import cern.streaming.pool.ext.tensorics.conf.DefaultResolvingEngineConfiguration;
 import cern.streaming.pool.ext.tensorics.conf.TensoricsStreamingConfiguration;
 import cern.streaming.pool.ext.tensorics.domain.BufferedStreamId;
 import cern.streaming.pool.ext.tensorics.domain.FunctionStreamId;
@@ -36,7 +37,7 @@ import rx.Observable;
  * 
  * @author caguiler, kfuchsbe
  */
-@ContextConfiguration(classes = TensoricsStreamingConfiguration.class)
+@ContextConfiguration(classes = {DefaultResolvingEngineConfiguration.class, TensoricsStreamingConfiguration.class})
 public class ContinuousSignalRMSExample extends AbstractStreamTest implements RxStreamSupport, TensoricsStreamSupport {
 
     private static StreamId<Pair<Instant, Double>> ID_VALUES = NamedStreamId.ofName("VALUES_A");

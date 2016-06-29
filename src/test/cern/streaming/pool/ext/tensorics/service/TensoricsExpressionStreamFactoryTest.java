@@ -17,6 +17,8 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.tensorics.core.lang.DoubleScript;
+import org.tensorics.core.resolve.domain.DetailedResolved;
+import org.tensorics.core.resolve.engine.ResolvingEngines;
 import org.tensorics.core.tree.domain.Expression;
 
 import cern.streaming.pool.core.service.DiscoveryService;
@@ -24,7 +26,7 @@ import cern.streaming.pool.core.service.ReactiveStream;
 import cern.streaming.pool.core.service.StreamId;
 import cern.streaming.pool.core.service.util.ReactiveStreams;
 import cern.streaming.pool.core.testing.NamedStreamId;
-import cern.streaming.pool.ext.tensorics.domain.ExpressionBasedStreamId;
+import cern.streaming.pool.ext.tensorics.domain.DetailedExpressionStreamId;
 import cern.streaming.pool.ext.tensorics.domain.StreamIdBasedExpression;
 import rx.Observable;
 
@@ -45,17 +47,16 @@ public class TensoricsExpressionStreamFactoryTest {
     private static final Expression<Double> A_PLUS_B = mockExpression();
 
     @Mock
-    private ExpressionBasedStreamId<Double> expressionBasedStreamId;
+    private DetailedExpressionStreamId<Double, Expression<Double>> expressionBasedStreamId;
 
     @Mock
     private DiscoveryService discoveryService;
 
-    @Mock
-    private TensoricsExpressionStreamFactory factoryUnderTest;
+    private DetailedTensoricsExpressionStreamFactory factoryUnderTest;
 
     @Before
     public void setUp() {
-        factoryUnderTest = new TensoricsExpressionStreamFactory();
+        factoryUnderTest = new DetailedTensoricsExpressionStreamFactory(ResolvingEngines.defaultEngine());
         when(expressionBasedStreamId.getExpression()).thenReturn(A_PLUS_B);
 
         mockStream1();
@@ -63,13 +64,13 @@ public class TensoricsExpressionStreamFactoryTest {
     }
 
     private void mockStream1() {
-        Observable<Double> first = Observable.interval(1, TimeUnit.SECONDS).map(i -> (i + 1) * 10D).limit(3);
+        Observable<Double> first = Observable.interval(100, TimeUnit.MILLISECONDS).map(i -> (i + 1) * 10D).limit(3);
         ReactiveStream<Double> firstReact = ReactiveStreams.fromRx(first);
         when(discoveryService.discover(ID_A)).thenReturn(firstReact);
     }
 
     private void mockStream2() {
-        Observable<Double> second = Observable.interval(2, TimeUnit.SECONDS).map(i -> 2.0).limit(3);
+        Observable<Double> second = Observable.interval(77, TimeUnit.MILLISECONDS).map(i -> 2.0).limit(3);
         ReactiveStream<Double> secondReact = ReactiveStreams.fromRx(second);
         when(discoveryService.discover(ID_B)).thenReturn(secondReact);
     }
@@ -82,11 +83,13 @@ public class TensoricsExpressionStreamFactoryTest {
 
     @Test
     public void testCreate() {
-        ReactiveStream<Double> resolvedExpression = factoryUnderTest.create(expressionBasedStreamId, discoveryService);
+        ReactiveStream<DetailedResolved<Double, Expression<Double>>> resolvedExpression = factoryUnderTest
+                .create(expressionBasedStreamId, discoveryService);
 
-        List<Double> values = ReactiveStreams.rxFrom(resolvedExpression).toList().toBlocking().single();
+        List<Double> values = ReactiveStreams.rxFrom(resolvedExpression).map(DetailedResolved::value).toList()
+                .toBlocking().single();
 
-        assertEquals(4, values.size());
+        assertEquals(5, values.size());
     }
 
     private static Expression<Double> mockExpression() {
