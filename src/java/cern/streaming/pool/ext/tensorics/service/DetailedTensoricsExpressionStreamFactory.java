@@ -68,6 +68,8 @@ public class DetailedTensoricsExpressionStreamFactory implements StreamFactory {
 
         Collection<Node> leaves = Trees.findBottomNodes(expression);
 
+        System.out.println("leaves:" + leaves);
+        
         @SuppressWarnings("unchecked")
         Map<StreamIdBasedExpression<Object>, StreamId<Object>> streamIds = leaves.stream()
                 .filter(node -> node instanceof StreamIdBasedExpression)
@@ -78,6 +80,7 @@ public class DetailedTensoricsExpressionStreamFactory implements StreamFactory {
 
         for (Entry<StreamIdBasedExpression<Object>, StreamId<Object>> entry : streamIds.entrySet()) {
             Observable<?> plainObservable = rxFrom(discoveryService.discover(entry.getValue()));
+            plainObservable.doOnNext((a) -> System.out.println(a));
             Observable<ExpToValue> mappedObservable = plainObservable.map(obj -> (new ExpToValue(entry.getKey(), obj)));
             observableEntries.add(mappedObservable);
         }
