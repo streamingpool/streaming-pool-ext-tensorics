@@ -6,19 +6,19 @@ package cern.streaming.pool.ext.tensorics.domain;
 
 import static java.util.Objects.requireNonNull;
 
-import org.tensorics.core.resolve.domain.DetailedResolved;
+import org.tensorics.core.resolve.domain.DetailedResolvedExpression;
 import org.tensorics.core.tree.domain.Expression;
 
 import cern.streaming.pool.core.service.StreamId;
 
 /**
  * A {@link StreamId} that encapsulates an {@link Expression} and provides detailed information about its resolution (
- * {@link DetailedResolved}).
+ * {@link DetailedResolvedExpression}).
  * 
  * @param <R> the type of the data the source expression resolves
  * @param <E> the type of the expression that is wrapped
  */
-public class DetailedExpressionStreamId<R, E extends Expression<R>> implements StreamId<DetailedResolved<R, E>> {
+public class DetailedExpressionStreamId<R, E extends Expression<R>> implements StreamId<DetailedResolvedExpression<R, E>> {
 
     private final E expression;
 
