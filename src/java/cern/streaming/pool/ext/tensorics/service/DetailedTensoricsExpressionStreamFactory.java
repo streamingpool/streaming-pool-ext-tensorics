@@ -15,7 +15,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.stream.Collectors;
 
-import org.tensorics.core.resolve.domain.DetailedResolved;
+import org.tensorics.core.resolve.domain.DetailedResolvedExpression;
 import org.tensorics.core.resolve.engine.ResolvingEngine;
 import org.tensorics.core.tree.domain.Contexts;
 import org.tensorics.core.tree.domain.EditableResolvingContext;
@@ -62,7 +62,7 @@ public class DetailedTensoricsExpressionStreamFactory implements StreamFactory {
         return (ReactiveStream<T>) fromRx(resolvedStream((DetailedExpressionStreamId<?, ?>) id, discoveryService));
     }
 
-    private <T, E extends Expression<T>> Observable<DetailedResolved<T, E>> resolvedStream(
+    private <T, E extends Expression<T>> Observable<DetailedResolvedExpression<T, E>> resolvedStream(
             DetailedExpressionStreamId<T, E> id, DiscoveryService discoveryService) {
         E expression = id.getExpression();
 
