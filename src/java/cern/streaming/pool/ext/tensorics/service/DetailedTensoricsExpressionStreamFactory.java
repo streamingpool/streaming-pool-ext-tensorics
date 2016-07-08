@@ -15,8 +15,9 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.stream.Collectors;
 
-import org.tensorics.core.resolve.domain.DetailedResolvedExpression;
+import org.tensorics.core.resolve.domain.DetailedExpressionResult;
 import org.tensorics.core.resolve.engine.ResolvingEngine;
+import org.tensorics.core.resolve.options.HandleWithFirstCapableAncestorStrategy;
 import org.tensorics.core.tree.domain.Contexts;
 import org.tensorics.core.tree.domain.EditableResolvingContext;
 import org.tensorics.core.tree.domain.Expression;
@@ -37,6 +38,8 @@ import rx.functions.FuncN;
  * @author kfuchsbe, caguiler
  */
 public class DetailedTensoricsExpressionStreamFactory implements StreamFactory {
+
+    private static final HandleWithFirstCapableAncestorStrategy EXCEPTION_HANDLING_STRATEGY = new HandleWithFirstCapableAncestorStrategy();
 
     private static final FuncN<ResolvingContext> CONTEXT_COMBINER = (Object... entriesToCombine) -> {
         EditableResolvingContext context = Contexts.newResolvingContext();
@@ -62,7 +65,7 @@ public class DetailedTensoricsExpressionStreamFactory implements StreamFactory {
         return (ReactiveStream<T>) fromRx(resolvedStream((DetailedExpressionStreamId<?, ?>) id, discoveryService));
     }
 
-    private <T, E extends Expression<T>> Observable<DetailedResolvedExpression<T, E>> resolvedStream(
+    private <T, E extends Expression<T>> Observable<DetailedExpressionResult<T, E>> resolvedStream(
             DetailedExpressionStreamId<T, E> id, DiscoveryService discoveryService) {
         E expression = id.getExpression();
 
@@ -85,7 +88,7 @@ public class DetailedTensoricsExpressionStreamFactory implements StreamFactory {
             observableEntries.add(mappedObservable);
         }
 
-        return combineLatest(observableEntries, CONTEXT_COMBINER).map(ctx -> engine.resolveDetailed(expression, ctx));
+        return combineLatest(observableEntries, CONTEXT_COMBINER).map(ctx -> engine.resolveDetailed(expression, ctx, EXCEPTION_HANDLING_STRATEGY));
     }
 
     private static final class ExpToValue {

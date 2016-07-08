@@ -7,7 +7,7 @@ package cern.streaming.pool.ext.tensorics.service;
 import static cern.streaming.pool.core.service.util.ReactiveStreams.fromRx;
 import static cern.streaming.pool.core.service.util.ReactiveStreams.rxFrom;
 
-import org.tensorics.core.resolve.domain.DetailedResolvedExpression;
+import org.tensorics.core.resolve.domain.DetailedExpressionResult;
 
 import cern.streaming.pool.core.service.DiscoveryService;
 import cern.streaming.pool.core.service.ReactiveStream;
@@ -27,7 +27,7 @@ public class TensoricsExpressionStreamFactory implements StreamFactory {
             return null;
         }
         DetailedExpressionStreamId<T,?> expression = ((ExpressionBasedStreamId<T>) id).getDetailedId();
-        return fromRx(rxFrom(discoveryService.discover(expression)).map(DetailedResolvedExpression::value));
+        return fromRx(rxFrom(discoveryService.discover(expression)).map(DetailedExpressionResult::value));
     }
 
 }

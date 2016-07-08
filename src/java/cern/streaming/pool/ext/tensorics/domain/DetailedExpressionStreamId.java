@@ -6,7 +6,7 @@ package cern.streaming.pool.ext.tensorics.domain;
 
 import static java.util.Objects.requireNonNull;
 
-import org.tensorics.core.resolve.domain.DetailedResolvedExpression;
+import org.tensorics.core.resolve.domain.DetailedExpressionResult;
 import org.tensorics.core.tree.domain.Expression;
 
 import cern.streaming.pool.core.service.StreamId;
@@ -18,7 +18,7 @@ import cern.streaming.pool.core.service.StreamId;
  * @param <R> the type of the data the source expression resolves
  * @param <E> the type of the expression that is wrapped
  */
-public class DetailedExpressionStreamId<R, E extends Expression<R>> implements StreamId<DetailedResolvedExpression<R, E>> {
+public class DetailedExpressionStreamId<R, E extends Expression<R>> implements StreamId<DetailedExpressionResult<R, E>> {
 
     private final E expression;
 

@@ -17,7 +17,7 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.tensorics.core.lang.DoubleScript;
-import org.tensorics.core.resolve.domain.DetailedResolvedExpression;
+import org.tensorics.core.resolve.domain.DetailedExpressionResult;
 import org.tensorics.core.resolve.engine.ResolvingEngines;
 import org.tensorics.core.tree.domain.Expression;
 
@@ -83,10 +83,10 @@ public class TensoricsExpressionStreamFactoryTest {
 
     @Test
     public void testCreate() {
-        ReactiveStream<DetailedResolvedExpression<Double, Expression<Double>>> resolvedExpression = factoryUnderTest
+        ReactiveStream<DetailedExpressionResult<Double, Expression<Double>>> resolvedExpression = factoryUnderTest
                 .create(expressionBasedStreamId, discoveryService);
 
-        List<Double> values = ReactiveStreams.rxFrom(resolvedExpression).map(DetailedResolvedExpression::value).toList()
+        List<Double> values = ReactiveStreams.rxFrom(resolvedExpression).map(DetailedExpressionResult::value).toList()
                 .toBlocking().single();
 
         assertEquals(5, values.size());
