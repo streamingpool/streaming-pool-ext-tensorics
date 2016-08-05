@@ -15,7 +15,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.springframework.test.context.ContextConfiguration;
 import org.tensorics.core.function.DiscreteFunction;
-import org.tensorics.core.function.lang.FunctionExpressionSupportWithConversion;
+import org.tensorics.core.function.lang.FunctionExpressionSupportWithConversionAndComparator;
 import org.tensorics.core.lang.DoubleScript;
 import org.tensorics.core.tree.domain.Expression;
 
@@ -67,8 +67,8 @@ public class ContinuousSignalRMSExample extends AbstractStreamTest implements Rx
 
             @Override
             protected Expression<Double> describe() {
-                FunctionExpressionSupportWithConversion<Instant, Double> supportWithConversion = withConversion(
-                        (Instant t) -> (double) t.toEpochMilli());
+                FunctionExpressionSupportWithConversionAndComparator<Instant, Double> supportWithConversion = withConversionAndComparator(
+                        (Instant t) -> (double) t.toEpochMilli(), Instant::compareTo);
 
                 return supportWithConversion.rmsOfF(SIGNAL);
             }
