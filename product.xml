@@ -11,7 +11,7 @@
 			<dep product="spring-context" version="PRO" />
 			<dep product="spring-test" version="DEV" local="true" excluded="true" />
 
-			<dep product="streaming-pool-core" />
+			<dep product="streaming-pool-core" version="DEV" />
 			<dep product="tensorics-core" version="DEV" />
 
 			<dep product="junit" version="4.12" local="true" excluded="true" />

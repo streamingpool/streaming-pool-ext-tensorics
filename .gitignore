@@ -6,3 +6,5 @@
 bin/
 *.log
 /build/
+dependencies.json
+dependencies.gradle
