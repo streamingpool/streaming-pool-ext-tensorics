@@ -19,15 +19,16 @@ import cern.streaming.pool.ext.tensorics.domain.ExpressionBasedStreamId;
 /**
  * @author kfuchsbe, caguiler
  */
-public class TensoricsExpressionStreamFactory implements StreamFactory {
+public class TensoricsExpressionStreamFactory<R> implements StreamFactory<R, ExpressionBasedStreamId<R>> {
 
     @Override
-    public <T> ReactiveStream<T> create(StreamId<T> id, DiscoveryService discoveryService) {
-        if (!(id instanceof ExpressionBasedStreamId)) {
-            return null;
-        }
-        DetailedExpressionStreamId<T,?> expression = ((ExpressionBasedStreamId<T>) id).getDetailedId();
+    public ReactiveStream<R> create(ExpressionBasedStreamId<R> id, DiscoveryService discoveryService) {
+        DetailedExpressionStreamId<R, ?> expression = (id.getDetailedId());
         return fromRx(rxFrom(discoveryService.discover(expression)).map(DetailedExpressionResult::value));
     }
 
+    @Override
+    public boolean canCreate(StreamId<?> id) {
+        return id instanceof ExpressionBasedStreamId;
+    }
 }

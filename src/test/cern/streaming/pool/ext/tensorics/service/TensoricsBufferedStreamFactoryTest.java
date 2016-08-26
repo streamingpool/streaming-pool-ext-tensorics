@@ -4,8 +4,9 @@
 
 package cern.streaming.pool.ext.tensorics.service;
 
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -48,11 +49,11 @@ public class TensoricsBufferedStreamFactoryTest {
 
     private Duration windowsLength;
 
-    private TensoricsBufferedStreamFactory factoryUnderTest;
+    private TensoricsBufferedStreamFactory<Integer> factoryUnderTest;
 
     @Before
     public void setUp() {
-        factoryUnderTest = new TensoricsBufferedStreamFactory();
+        factoryUnderTest = new TensoricsBufferedStreamFactory<>();
 
         mockBufferedStreamId();
         mockDiscoveryService();
@@ -69,11 +70,20 @@ public class TensoricsBufferedStreamFactoryTest {
     }
 
     @Test
-    public void testCreateReturnsNullWhenANonBufferedStreamIdIsProvided() {
-        ReactiveStream<?> createdStream = factoryUnderTest.create(invalidStreamId, discoveryService);
-        assertNull(createdStream);
+    public void testCanCreateWithCorrectStreamIdType() {
+        assertTrue(factoryUnderTest.canCreate(bufferedStreamId));
     }
 
+    @Test
+    public void testCanCreateWithWrongStreamIdType() {
+        assertFalse(factoryUnderTest.canCreate(invalidStreamId));
+    }
+    
+    @Test
+    public void testCanCreateWithNull() {
+        assertFalse(factoryUnderTest.canCreate(null));
+    }
+    
     private void mockDiscoveryService() {
         ReactiveStream<Integer> stream = ReactiveStreams.fromRx(Observable.just(1));
         when(discoveryService.discover(streamId)).thenReturn(stream);

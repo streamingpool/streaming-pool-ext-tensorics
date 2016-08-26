@@ -5,8 +5,8 @@
 package cern.streaming.pool.ext.tensorics.service;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.when;
@@ -48,20 +48,14 @@ public class DiscreteFunctionStreamFactoryTest extends AbstractStreamTest {
     @Mock
     private FunctionStreamId<Pair<Integer, Double>, Integer, Double> functionStreamId;
 
-    private DiscreteFunctionStreamFactory factoryUnderTest;
+    private DiscreteFunctionStreamFactory<Pair<Integer, Double>, Integer, Double> factoryUnderTest;
 
     @Before
     public void setUp() {
-        factoryUnderTest = new DiscreteFunctionStreamFactory();
+        factoryUnderTest = new DiscreteFunctionStreamFactory<>();
         mockFunctionStreamId();
         mockDiscoveryService();
 
-    }
-
-    @Test
-    public void testCreateReturnsNullWhenANonFunctionStreamIdIsProvided() {
-        ReactiveStream<?> reactStream = factoryUnderTest.create(bufferedStreamId, discoveryService);
-        assertNull(reactStream);
     }
 
     @Test
@@ -80,7 +74,22 @@ public class DiscreteFunctionStreamFactoryTest extends AbstractStreamTest {
         assertTrue(functions.stream().allMatch(f -> f.definedXValues().size() == 2));
 
     }
+    
+    @Test
+    public void testCanCreateWithCorrectStreamIdType() {
+        assertTrue(factoryUnderTest.canCreate(functionStreamId));
+    }
 
+    @Test
+    public void testCanCreateWithWrongStreamIdType() {
+        assertFalse(factoryUnderTest.canCreate(bufferedStreamId));
+    }
+    
+    @Test
+    public void testCanCreateWithNull() {
+        assertFalse(factoryUnderTest.canCreate(null));
+    }
+    
     private void mockDiscoveryService() {
         List<Pair<Integer, Double>> list1 = Arrays.asList(Pair.of(1, 1.0), Pair.of(2, 2.0));
         List<Pair<Integer, Double>> list2 = Arrays.asList(Pair.of(3, 3.0), Pair.of(4, 4.0));

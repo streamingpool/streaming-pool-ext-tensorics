@@ -21,32 +21,27 @@ import rx.Observable;
  * 
  * @author caguiler, kfuchsbe
  */
-public class TensoricsBufferedStreamFactory implements StreamFactory {
+public class TensoricsBufferedStreamFactory<R> implements StreamFactory<List<R>, BufferedStreamId<R>> {
 
-    @SuppressWarnings("unchecked")
     @Override
-    public <T> ReactiveStream<T> create(StreamId<T> id, DiscoveryService discoveryService) {
-
-        if (!(id instanceof BufferedStreamId)) {
-            return null;
-        }
-
-        BufferedStreamId<T> bufferedStreamId = (BufferedStreamId<T>) id;
-        
-        Observable<List<T>> buffered = bufferedStream(discoveryService, bufferedStreamId);
-
-        return (ReactiveStream<T>) ReactiveStreams.fromRx(buffered);
+    public ReactiveStream<List<R>> create(BufferedStreamId<R> id, DiscoveryService discoveryService) {
+        return ReactiveStreams.fromRx(bufferedStream(discoveryService, id));
     }
 
-    private <R> Observable<List<R>> bufferedStream(DiscoveryService discoveryService,
+    @Override
+    public boolean canCreate(StreamId<?> id) {
+        return id instanceof BufferedStreamId;
+    }
+
+    private Observable<List<R>> bufferedStream(DiscoveryService discoveryService,
             BufferedStreamId<R> bufferedStreamId) {
 
         ReactiveStream<R> sourceStream = discoveryService.discover(bufferedStreamId.getSourceStream());
 
         Duration windowLength = bufferedStreamId.getWindowLength();
-        
-        ///XXX: Sliding window ??
-        return ReactiveStreams.rxFrom(sourceStream).buffer(windowLength.toNanos(),TimeUnit.NANOSECONDS);
+
+        /// XXX: Sliding window ??
+        return ReactiveStreams.rxFrom(sourceStream).buffer(windowLength.toNanos(), TimeUnit.NANOSECONDS);
     }
 
 }

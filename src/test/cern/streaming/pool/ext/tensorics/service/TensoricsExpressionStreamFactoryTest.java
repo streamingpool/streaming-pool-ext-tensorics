@@ -5,7 +5,9 @@
 package cern.streaming.pool.ext.tensorics.service;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
@@ -26,6 +28,7 @@ import cern.streaming.pool.core.service.ReactiveStream;
 import cern.streaming.pool.core.service.StreamId;
 import cern.streaming.pool.core.service.util.ReactiveStreams;
 import cern.streaming.pool.core.testing.NamedStreamId;
+import cern.streaming.pool.ext.tensorics.domain.BufferedStreamId;
 import cern.streaming.pool.ext.tensorics.domain.DetailedExpressionStreamId;
 import cern.streaming.pool.ext.tensorics.domain.StreamIdBasedExpression;
 import rx.Observable;
@@ -50,13 +53,16 @@ public class TensoricsExpressionStreamFactoryTest {
     private DetailedExpressionStreamId<Double, Expression<Double>> expressionBasedStreamId;
 
     @Mock
+    private BufferedStreamId<Integer> invalidStreamId;
+    
+    @Mock
     private DiscoveryService discoveryService;
 
-    private DetailedTensoricsExpressionStreamFactory factoryUnderTest;
+    private DetailedTensoricsExpressionStreamFactory<Double, Expression<Double>> factoryUnderTest;
 
     @Before
     public void setUp() {
-        factoryUnderTest = new DetailedTensoricsExpressionStreamFactory(ResolvingEngines.defaultEngine());
+        factoryUnderTest = new DetailedTensoricsExpressionStreamFactory<>(ResolvingEngines.defaultEngine());
         when(expressionBasedStreamId.getExpression()).thenReturn(A_PLUS_B);
 
         mockStream1();
@@ -76,12 +82,6 @@ public class TensoricsExpressionStreamFactoryTest {
     }
 
     @Test
-    public void testCreateReturnsNullWhenANonExpressionBasedStreamIdIsProvided() {
-        ReactiveStream<?> stream = factoryUnderTest.create(ID_A, discoveryService);
-        assertNull(stream);
-    }
-
-    @Test
     public void testCreate() {
         ReactiveStream<DetailedExpressionResult<Double, Expression<Double>>> resolvedExpression = factoryUnderTest
                 .create(expressionBasedStreamId, discoveryService);
@@ -92,6 +92,21 @@ public class TensoricsExpressionStreamFactoryTest {
         assertEquals(5, values.size());
     }
 
+    @Test
+    public void testCanCreateWithCorrectStreamIdType() {
+        assertTrue(factoryUnderTest.canCreate(expressionBasedStreamId));
+    }
+
+    @Test
+    public void testCanCreateWithWrongStreamIdType() {
+        assertFalse(factoryUnderTest.canCreate(invalidStreamId));
+    }
+    
+    @Test
+    public void testCanCreateWithNull() {
+        assertFalse(factoryUnderTest.canCreate(null));
+    }
+    
     private static Expression<Double> mockExpression() {
 
         return new DoubleScript<Double>() {

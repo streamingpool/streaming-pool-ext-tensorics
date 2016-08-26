@@ -37,7 +37,7 @@ import rx.Observable;
  * 
  * @author caguiler, kfuchsbe
  */
-@ContextConfiguration(classes = {DefaultResolvingEngineConfiguration.class, TensoricsStreamingConfiguration.class})
+@ContextConfiguration(classes = { DefaultResolvingEngineConfiguration.class, TensoricsStreamingConfiguration.class })
 public class ContinuousSignalRMSExample extends AbstractStreamTest implements RxStreamSupport, TensoricsStreamSupport {
 
     private static StreamId<Pair<Instant, Double>> ID_VALUES = NamedStreamId.ofName("VALUES_A");

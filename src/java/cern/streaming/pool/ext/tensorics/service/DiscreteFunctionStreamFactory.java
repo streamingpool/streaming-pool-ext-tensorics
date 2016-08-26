@@ -24,32 +24,34 @@ import rx.Observable;
  * 
  * @author caguiler, kfuchsbe
  */
-public class DiscreteFunctionStreamFactory implements StreamFactory {
+public class DiscreteFunctionStreamFactory<T, X, Y>
+        implements StreamFactory<DiscreteFunction<X, Y>, FunctionStreamId<T, X, Y>> {
 
-    @SuppressWarnings("unchecked")
     @Override
-    public <T> ReactiveStream<T> create(StreamId<T> id, DiscoveryService discoveryService) {
-        if (!(id instanceof FunctionStreamId)) {
-            return null;
-        }
-
-        return (ReactiveStream<T>) createFunctionStream((FunctionStreamId<?, ?, ?>) id, discoveryService);
+    public ReactiveStream<DiscreteFunction<X, Y>> create(FunctionStreamId<T, X, Y> id,
+            DiscoveryService discoveryService) {
+        return createFunctionStream(id, discoveryService);
     }
 
-    <R, X, Y> ReactiveStream<DiscreteFunction<X, Y>> createFunctionStream(FunctionStreamId<R, X, Y> id,
+    @Override
+    public boolean canCreate(StreamId<?> id) {
+        return id instanceof FunctionStreamId;
+    }
+
+    ReactiveStream<DiscreteFunction<X, Y>> createFunctionStream(FunctionStreamId<T, X, Y> id,
             DiscoveryService discoveryService) {
 
-        BufferedStreamId<R> sourceStream = id.getSourceStream();
-        Conversion<? super R, ? extends X> toX = id.getToX();
-        Conversion<? super R, ? extends Y> toY = id.getToY();
+        BufferedStreamId<T> sourceStream = id.getSourceStream();
+        Conversion<? super T, ? extends X> toX = id.getToX();
+        Conversion<? super T, ? extends Y> toY = id.getToY();
 
-        Observable<List<R>> buffered = ReactiveStreams.rxFrom(discoveryService.discover(sourceStream));
+        Observable<List<T>> buffered = ReactiveStreams.rxFrom(discoveryService.discover(sourceStream));
 
         Observable<DiscreteFunction<X, Y>> functions = buffered.map(iterable -> {
 
             MapBackedDiscreteFunction.Builder<X, Y> functionBuilder = MapBackedDiscreteFunction.builder();
-            
-            for (R t : iterable) {
+
+            for (T t : iterable) {
                 functionBuilder.put(toX.apply(t), toY.apply(t));
             }
 

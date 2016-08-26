@@ -37,7 +37,8 @@ import rx.functions.FuncN;
 /**
  * @author kfuchsbe, caguiler
  */
-public class DetailedTensoricsExpressionStreamFactory implements StreamFactory {
+public class DetailedTensoricsExpressionStreamFactory<R, E extends Expression<R>>
+        implements StreamFactory<DetailedExpressionResult<R, E>, DetailedExpressionStreamId<R, E>> {
 
     private static final HandleWithFirstCapableAncestorStrategy EXCEPTION_HANDLING_STRATEGY = new HandleWithFirstCapableAncestorStrategy();
 
@@ -56,23 +57,25 @@ public class DetailedTensoricsExpressionStreamFactory implements StreamFactory {
         this.engine = engine;
     }
 
-    @SuppressWarnings("unchecked")
     @Override
-    public <T> ReactiveStream<T> create(StreamId<T> id, DiscoveryService discoveryService) {
-        if (!(id instanceof DetailedExpressionStreamId)) {
-            return null;
-        }
-        return (ReactiveStream<T>) fromRx(resolvedStream((DetailedExpressionStreamId<?, ?>) id, discoveryService));
+    public ReactiveStream<DetailedExpressionResult<R, E>> create(DetailedExpressionStreamId<R, E> id,
+            DiscoveryService discoveryService) {
+        return fromRx(resolvedStream(id, discoveryService));
     }
 
-    private <T, E extends Expression<T>> Observable<DetailedExpressionResult<T, E>> resolvedStream(
-            DetailedExpressionStreamId<T, E> id, DiscoveryService discoveryService) {
+    @Override
+    public boolean canCreate(StreamId<?> id) {
+        return id instanceof DetailedExpressionStreamId;
+    }
+
+    private Observable<DetailedExpressionResult<R, E>> resolvedStream(DetailedExpressionStreamId<R, E> id,
+            DiscoveryService discoveryService) {
         E expression = id.getExpression();
 
         Collection<Node> leaves = Trees.findBottomNodes(expression);
 
         System.out.println("leaves:" + leaves);
-        
+
         @SuppressWarnings("unchecked")
         Map<StreamIdBasedExpression<Object>, StreamId<Object>> streamIds = leaves.stream()
                 .filter(node -> node instanceof StreamIdBasedExpression)
@@ -88,7 +91,8 @@ public class DetailedTensoricsExpressionStreamFactory implements StreamFactory {
             observableEntries.add(mappedObservable);
         }
 
-        return combineLatest(observableEntries, CONTEXT_COMBINER).map(ctx -> engine.resolveDetailed(expression, ctx, EXCEPTION_HANDLING_STRATEGY));
+        return combineLatest(observableEntries, CONTEXT_COMBINER)
+                .map(ctx -> engine.resolveDetailed(expression, ctx, EXCEPTION_HANDLING_STRATEGY));
     }
 
     private static final class ExpToValue {
