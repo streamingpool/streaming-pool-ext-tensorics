@@ -49,11 +49,11 @@ public class TensoricsBufferedStreamFactoryTest {
 
     private Duration windowsLength;
 
-    private TensoricsBufferedStreamFactory<Integer> factoryUnderTest;
+    private TensoricsBufferedStreamFactory factoryUnderTest;
 
     @Before
     public void setUp() {
-        factoryUnderTest = new TensoricsBufferedStreamFactory<>();
+        factoryUnderTest = new TensoricsBufferedStreamFactory();
 
         mockBufferedStreamId();
         mockDiscoveryService();
@@ -61,7 +61,7 @@ public class TensoricsBufferedStreamFactoryTest {
 
     @Test
     public void testCreate() {
-        ReactiveStream<List<Integer>> createdStream = factoryUnderTest.create(bufferedStreamId, discoveryService);
+        ReactiveStream<List<Integer>> createdStream = factoryUnderTest.create(bufferedStreamId, discoveryService).get();
 
         verify(bufferedStreamId).getSourceStream();
         verify(bufferedStreamId).getWindowLength();
@@ -71,19 +71,19 @@ public class TensoricsBufferedStreamFactoryTest {
 
     @Test
     public void testCanCreateWithCorrectStreamIdType() {
-        assertTrue(factoryUnderTest.canCreate(bufferedStreamId));
+        assertTrue(factoryUnderTest.create(bufferedStreamId, discoveryService).isPresent());
     }
 
     @Test
     public void testCanCreateWithWrongStreamIdType() {
-        assertFalse(factoryUnderTest.canCreate(invalidStreamId));
+        assertFalse(factoryUnderTest.create(invalidStreamId, discoveryService).isPresent());
     }
-    
+
     @Test
     public void testCanCreateWithNull() {
-        assertFalse(factoryUnderTest.canCreate(null));
+        assertFalse(factoryUnderTest.create(null, discoveryService).isPresent());
     }
-    
+
     private void mockDiscoveryService() {
         ReactiveStream<Integer> stream = ReactiveStreams.fromRx(Observable.just(1));
         when(discoveryService.discover(streamId)).thenReturn(stream);

@@ -48,11 +48,11 @@ public class DiscreteFunctionStreamFactoryTest extends AbstractStreamTest {
     @Mock
     private FunctionStreamId<Pair<Integer, Double>, Integer, Double> functionStreamId;
 
-    private DiscreteFunctionStreamFactory<Pair<Integer, Double>, Integer, Double> factoryUnderTest;
+    private DiscreteFunctionStreamFactory factoryUnderTest;
 
     @Before
     public void setUp() {
-        factoryUnderTest = new DiscreteFunctionStreamFactory<>();
+        factoryUnderTest = new DiscreteFunctionStreamFactory();
         mockFunctionStreamId();
         mockDiscoveryService();
 
@@ -61,7 +61,7 @@ public class DiscreteFunctionStreamFactoryTest extends AbstractStreamTest {
     @Test
     public void testCreate() {
         ReactiveStream<DiscreteFunction<Integer, Double>> reactStream = factoryUnderTest.create(functionStreamId,
-                discoveryService);
+                discoveryService).get();
 
         assertNotNull(reactStream);
 
@@ -77,17 +77,17 @@ public class DiscreteFunctionStreamFactoryTest extends AbstractStreamTest {
     
     @Test
     public void testCanCreateWithCorrectStreamIdType() {
-        assertTrue(factoryUnderTest.canCreate(functionStreamId));
+        assertTrue(factoryUnderTest.create(functionStreamId, discoveryService).isPresent());
     }
 
     @Test
     public void testCanCreateWithWrongStreamIdType() {
-        assertFalse(factoryUnderTest.canCreate(bufferedStreamId));
+        assertFalse(factoryUnderTest.create(bufferedStreamId, discoveryService).isPresent());
     }
     
     @Test
     public void testCanCreateWithNull() {
-        assertFalse(factoryUnderTest.canCreate(null));
+        assertFalse(factoryUnderTest.create(null, discoveryService).isPresent());
     }
     
     private void mockDiscoveryService() {

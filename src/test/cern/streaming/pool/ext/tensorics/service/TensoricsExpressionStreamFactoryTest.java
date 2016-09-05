@@ -6,7 +6,6 @@ package cern.streaming.pool.ext.tensorics.service;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.when;
 
@@ -58,11 +57,11 @@ public class TensoricsExpressionStreamFactoryTest {
     @Mock
     private DiscoveryService discoveryService;
 
-    private DetailedTensoricsExpressionStreamFactory<Double, Expression<Double>> factoryUnderTest;
+    private DetailedTensoricsExpressionStreamFactory factoryUnderTest;
 
     @Before
     public void setUp() {
-        factoryUnderTest = new DetailedTensoricsExpressionStreamFactory<>(ResolvingEngines.defaultEngine());
+        factoryUnderTest = new DetailedTensoricsExpressionStreamFactory(ResolvingEngines.defaultEngine());
         when(expressionBasedStreamId.getExpression()).thenReturn(A_PLUS_B);
 
         mockStream1();
@@ -84,7 +83,7 @@ public class TensoricsExpressionStreamFactoryTest {
     @Test
     public void testCreate() {
         ReactiveStream<DetailedExpressionResult<Double, Expression<Double>>> resolvedExpression = factoryUnderTest
-                .create(expressionBasedStreamId, discoveryService);
+                .create(expressionBasedStreamId, discoveryService).get();
 
         List<Double> values = ReactiveStreams.rxFrom(resolvedExpression).map(DetailedExpressionResult::value).toList()
                 .toBlocking().single();
@@ -94,17 +93,17 @@ public class TensoricsExpressionStreamFactoryTest {
 
     @Test
     public void testCanCreateWithCorrectStreamIdType() {
-        assertTrue(factoryUnderTest.canCreate(expressionBasedStreamId));
+        assertTrue(factoryUnderTest.create(expressionBasedStreamId, discoveryService).isPresent());
     }
 
     @Test
     public void testCanCreateWithWrongStreamIdType() {
-        assertFalse(factoryUnderTest.canCreate(invalidStreamId));
+        assertFalse(factoryUnderTest.create(invalidStreamId, discoveryService).isPresent());
     }
     
     @Test
     public void testCanCreateWithNull() {
-        assertFalse(factoryUnderTest.canCreate(null));
+        assertFalse(factoryUnderTest.create(null, discoveryService).isPresent());
     }
     
     private static Expression<Double> mockExpression() {

@@ -4,7 +4,11 @@
 
 package cern.streaming.pool.ext.tensorics.service;
 
+import static cern.streaming.pool.core.service.util.ReactiveStreams.fromRx;
+import static java.util.Optional.of;
+
 import java.util.List;
+import java.util.Optional;
 
 import org.tensorics.core.commons.operations.Conversion;
 import org.tensorics.core.function.DiscreteFunction;
@@ -24,40 +28,42 @@ import rx.Observable;
  * 
  * @author caguiler, kfuchsbe
  */
-public class DiscreteFunctionStreamFactory<T, X, Y>
-        implements StreamFactory<DiscreteFunction<X, Y>, FunctionStreamId<T, X, Y>> {
+public class DiscreteFunctionStreamFactory implements StreamFactory {
 
+    /* Safe, manually checked */
+    @SuppressWarnings("unchecked")
     @Override
-    public ReactiveStream<DiscreteFunction<X, Y>> create(FunctionStreamId<T, X, Y> id,
-            DiscoveryService discoveryService) {
-        return createFunctionStream(id, discoveryService);
+    public <T> Optional<ReactiveStream<T>> create(StreamId<T> id, DiscoveryService discoveryService) {
+        if (!(id instanceof FunctionStreamId)) {
+            return Optional.empty();
+        }
+
+        FunctionStreamId<?, ?, ?> functionId = (FunctionStreamId<?, ?, ?>) id;
+
+        return of((ReactiveStream<T>) createFunctionStream(functionId, discoveryService));
     }
 
-    @Override
-    public boolean canCreate(StreamId<?> id) {
-        return id instanceof FunctionStreamId;
-    }
-
-    ReactiveStream<DiscreteFunction<X, Y>> createFunctionStream(FunctionStreamId<T, X, Y> id,
+    <R, X, Y> ReactiveStream<DiscreteFunction<X, Y>> createFunctionStream(FunctionStreamId<R, X, Y> id,
             DiscoveryService discoveryService) {
 
-        BufferedStreamId<T> sourceStream = id.getSourceStream();
-        Conversion<? super T, ? extends X> toX = id.getToX();
-        Conversion<? super T, ? extends Y> toY = id.getToY();
+        BufferedStreamId<R> sourceStream = id.getSourceStream();
+        Conversion<? super R, ? extends X> toX = id.getToX();
+        Conversion<? super R, ? extends Y> toY = id.getToY();
 
-        Observable<List<T>> buffered = ReactiveStreams.rxFrom(discoveryService.discover(sourceStream));
+        Observable<List<R>> buffered = ReactiveStreams.rxFrom(discoveryService.discover(sourceStream));
 
         Observable<DiscreteFunction<X, Y>> functions = buffered.map(iterable -> {
 
             MapBackedDiscreteFunction.Builder<X, Y> functionBuilder = MapBackedDiscreteFunction.builder();
 
-            for (T t : iterable) {
+            for (R t : iterable) {
                 functionBuilder.put(toX.apply(t), toY.apply(t));
             }
 
             return functionBuilder.build();
         });
 
-        return ReactiveStreams.fromRx(functions);
+        return fromRx(functions);
     }
+
 }

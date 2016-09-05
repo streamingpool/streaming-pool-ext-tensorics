@@ -7,6 +7,8 @@ package cern.streaming.pool.ext.tensorics.service;
 import static cern.streaming.pool.core.service.util.ReactiveStreams.fromRx;
 import static cern.streaming.pool.core.service.util.ReactiveStreams.rxFrom;
 
+import java.util.Optional;
+
 import org.tensorics.core.resolve.domain.DetailedExpressionResult;
 
 import cern.streaming.pool.core.service.DiscoveryService;
@@ -19,16 +21,16 @@ import cern.streaming.pool.ext.tensorics.domain.ExpressionBasedStreamId;
 /**
  * @author kfuchsbe, caguiler
  */
-public class TensoricsExpressionStreamFactory<R> implements StreamFactory<R, ExpressionBasedStreamId<R>> {
+public class TensoricsExpressionStreamFactory implements StreamFactory {
 
     @Override
-    public ReactiveStream<R> create(ExpressionBasedStreamId<R> id, DiscoveryService discoveryService) {
-        DetailedExpressionStreamId<R, ?> expression = (id.getDetailedId());
-        return fromRx(rxFrom(discoveryService.discover(expression)).map(DetailedExpressionResult::value));
+    public <Y> Optional<ReactiveStream<Y>> create(StreamId<Y> id, DiscoveryService discoveryService) {
+        if(!(id instanceof ExpressionBasedStreamId)) {
+            return Optional.empty();
+        }
+        ExpressionBasedStreamId<Y> expressionBasedId = (ExpressionBasedStreamId<Y>) id;
+        DetailedExpressionStreamId<Y, ?> expression = expressionBasedId.getDetailedId();
+        return Optional.of(fromRx(rxFrom(discoveryService.discover(expression)).map(DetailedExpressionResult::value)));
     }
 
-    @Override
-    public boolean canCreate(StreamId<?> id) {
-        return id instanceof ExpressionBasedStreamId;
-    }
 }

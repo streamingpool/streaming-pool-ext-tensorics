@@ -6,6 +6,7 @@ package cern.streaming.pool.ext.tensorics.service;
 
 import static cern.streaming.pool.core.service.util.ReactiveStreams.fromRx;
 import static cern.streaming.pool.core.service.util.ReactiveStreams.rxFrom;
+import static java.util.Optional.of;
 import static rx.Observable.combineLatest;
 
 import java.util.ArrayList;
@@ -13,6 +14,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.tensorics.core.resolve.domain.DetailedExpressionResult;
@@ -37,8 +39,7 @@ import rx.functions.FuncN;
 /**
  * @author kfuchsbe, caguiler
  */
-public class DetailedTensoricsExpressionStreamFactory<R, E extends Expression<R>>
-        implements StreamFactory<DetailedExpressionResult<R, E>, DetailedExpressionStreamId<R, E>> {
+public class DetailedTensoricsExpressionStreamFactory implements StreamFactory {
 
     private static final HandleWithFirstCapableAncestorStrategy EXCEPTION_HANDLING_STRATEGY = new HandleWithFirstCapableAncestorStrategy();
 
@@ -57,19 +58,17 @@ public class DetailedTensoricsExpressionStreamFactory<R, E extends Expression<R>
         this.engine = engine;
     }
 
+    @SuppressWarnings("unchecked")
     @Override
-    public ReactiveStream<DetailedExpressionResult<R, E>> create(DetailedExpressionStreamId<R, E> id,
-            DiscoveryService discoveryService) {
-        return fromRx(resolvedStream(id, discoveryService));
+    public <T> Optional<ReactiveStream<T>> create(StreamId<T> id, DiscoveryService discoveryService) {
+        if (!(id instanceof DetailedExpressionStreamId)) {
+            return Optional.empty();
+        }
+        return of((ReactiveStream<T>) fromRx(resolvedStream((DetailedExpressionStreamId<?, ?>) id, discoveryService)));
     }
 
-    @Override
-    public boolean canCreate(StreamId<?> id) {
-        return id instanceof DetailedExpressionStreamId;
-    }
-
-    private Observable<DetailedExpressionResult<R, E>> resolvedStream(DetailedExpressionStreamId<R, E> id,
-            DiscoveryService discoveryService) {
+    private <T, E extends Expression<T>> Observable<DetailedExpressionResult<T, E>> resolvedStream(
+            DetailedExpressionStreamId<T, E> id, DiscoveryService discoveryService) {
         E expression = id.getExpression();
 
         Collection<Node> leaves = Trees.findBottomNodes(expression);
