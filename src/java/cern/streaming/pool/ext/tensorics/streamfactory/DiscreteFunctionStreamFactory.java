@@ -2,7 +2,7 @@
  * Copyright (c) 2016 European Organisation for Nuclear Research (CERN), All Rights Reserved.
  */
 
-package cern.streaming.pool.ext.tensorics.service;
+package cern.streaming.pool.ext.tensorics.streamfactory;
 
 import static cern.streaming.pool.core.service.util.ReactiveStreams.fromRx;
 import static java.util.Optional.of;
@@ -19,8 +19,8 @@ import cern.streaming.pool.core.service.ReactiveStream;
 import cern.streaming.pool.core.service.StreamFactory;
 import cern.streaming.pool.core.service.StreamId;
 import cern.streaming.pool.core.service.util.ReactiveStreams;
-import cern.streaming.pool.ext.tensorics.domain.BufferedStreamId;
-import cern.streaming.pool.ext.tensorics.domain.FunctionStreamId;
+import cern.streaming.pool.ext.tensorics.streamid.BufferedStreamId;
+import cern.streaming.pool.ext.tensorics.streamid.FunctionStreamId;
 import rx.Observable;
 
 /**

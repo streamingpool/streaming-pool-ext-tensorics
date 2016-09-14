@@ -2,7 +2,7 @@
  * Copyright (c) 2016 European Organisation for Nuclear Research (CERN), All Rights Reserved.
  */
 
-package cern.streaming.pool.ext.tensorics.service;
+package cern.streaming.pool.ext.tensorics.streamfactory;
 
 import static cern.streaming.pool.core.service.util.ReactiveStreams.fromRx;
 import static cern.streaming.pool.core.service.util.ReactiveStreams.rxFrom;
@@ -16,7 +16,7 @@ import cern.streaming.pool.core.service.DiscoveryService;
 import cern.streaming.pool.core.service.ReactiveStream;
 import cern.streaming.pool.core.service.StreamFactory;
 import cern.streaming.pool.core.service.StreamId;
-import cern.streaming.pool.ext.tensorics.domain.BufferedStreamId;
+import cern.streaming.pool.ext.tensorics.streamid.BufferedStreamId;
 
 /**
  * Creates non-overlapping buffers in the form of lists by means of a {@link BufferedStreamId}

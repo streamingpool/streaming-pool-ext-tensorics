@@ -25,9 +25,9 @@ import cern.streaming.pool.core.testing.AbstractStreamTest;
 import cern.streaming.pool.core.testing.NamedStreamId;
 import cern.streaming.pool.ext.tensorics.conf.DefaultResolvingEngineConfiguration;
 import cern.streaming.pool.ext.tensorics.conf.TensoricsStreamingConfiguration;
-import cern.streaming.pool.ext.tensorics.domain.BufferedStreamId;
-import cern.streaming.pool.ext.tensorics.domain.FunctionStreamId;
-import cern.streaming.pool.ext.tensorics.domain.StreamIdBasedExpression;
+import cern.streaming.pool.ext.tensorics.expression.StreamIdBasedExpression;
+import cern.streaming.pool.ext.tensorics.streamid.BufferedStreamId;
+import cern.streaming.pool.ext.tensorics.streamid.FunctionStreamId;
 import cern.streaming.pool.ext.tensorics.support.TensoricsStreamSupport;
 import rx.Observable;
 

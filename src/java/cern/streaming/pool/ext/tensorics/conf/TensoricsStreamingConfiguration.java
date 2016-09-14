@@ -9,10 +9,10 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.tensorics.core.resolve.engine.ResolvingEngine;
 
-import cern.streaming.pool.ext.tensorics.service.DetailedTensoricsExpressionStreamFactory;
-import cern.streaming.pool.ext.tensorics.service.DiscreteFunctionStreamFactory;
-import cern.streaming.pool.ext.tensorics.service.TensoricsBufferedStreamFactory;
-import cern.streaming.pool.ext.tensorics.service.TensoricsExpressionStreamFactory;
+import cern.streaming.pool.ext.tensorics.streamfactory.DetailedTensoricsExpressionStreamFactory;
+import cern.streaming.pool.ext.tensorics.streamfactory.DiscreteFunctionStreamFactory;
+import cern.streaming.pool.ext.tensorics.streamfactory.TensoricsBufferedStreamFactory;
+import cern.streaming.pool.ext.tensorics.streamfactory.TensoricsExpressionStreamFactory;
 
 @Configuration
 public class TensoricsStreamingConfiguration {

@@ -27,8 +27,9 @@ import cern.streaming.pool.core.service.DiscoveryService;
 import cern.streaming.pool.core.service.ReactiveStream;
 import cern.streaming.pool.core.service.util.ReactiveStreams;
 import cern.streaming.pool.core.testing.AbstractStreamTest;
-import cern.streaming.pool.ext.tensorics.domain.BufferedStreamId;
-import cern.streaming.pool.ext.tensorics.domain.FunctionStreamId;
+import cern.streaming.pool.ext.tensorics.streamfactory.DiscreteFunctionStreamFactory;
+import cern.streaming.pool.ext.tensorics.streamid.BufferedStreamId;
+import cern.streaming.pool.ext.tensorics.streamid.FunctionStreamId;
 import rx.Observable;
 
 /**

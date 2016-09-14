@@ -10,7 +10,7 @@ import org.tensorics.core.tree.domain.Expression;
 import cern.streaming.pool.core.service.ReactiveStream;
 import cern.streaming.pool.core.service.util.ReactiveStreams;
 import cern.streaming.pool.core.support.StreamSupport;
-import cern.streaming.pool.ext.tensorics.domain.ExpressionBasedStreamId;
+import cern.streaming.pool.ext.tensorics.streamid.ExpressionBasedStreamId;
 import rx.Observable;
 
 /**

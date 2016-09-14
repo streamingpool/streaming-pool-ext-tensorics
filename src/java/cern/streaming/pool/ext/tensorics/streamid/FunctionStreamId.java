@@ -2,7 +2,7 @@
  * Copyright (c) 2016 European Organisation for Nuclear Research (CERN), All Rights Reserved.
  */
 
-package cern.streaming.pool.ext.tensorics.domain;
+package cern.streaming.pool.ext.tensorics.streamid;
 
 import org.tensorics.core.commons.operations.Conversion;
 import org.tensorics.core.function.DiscreteFunction;

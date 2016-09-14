@@ -2,7 +2,7 @@
  * Copyright (c) 2016 European Organisation for Nuclear Research (CERN), All Rights Reserved.
  */
 
-package cern.streaming.pool.ext.tensorics.domain;
+package cern.streaming.pool.ext.tensorics.streamid;
 
 import java.time.Duration;
 import java.util.List;
