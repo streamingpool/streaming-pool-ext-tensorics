@@ -4,8 +4,7 @@
 
 package cern.streaming.pool.ext.tensorics.streamid;
 
-import static java.util.stream.Collectors.toMap;
-import static org.tensorics.core.lang.Tensorics.fromMap;
+import static org.tensorics.core.tensor.stream.TensorStreams.toTensor;
 
 import java.util.Collection;
 import java.util.function.Function;
@@ -28,6 +27,6 @@ public class TensorConverterStreamId<T, U> extends DerivedStreamId<Collection<T>
 
     private TensorConverterStreamId(StreamId<Collection<T>> sourceStreamId, Function<T, Position> positionExtractor,
             Function<T, U> valueMapper) {
-        super(sourceStreamId, values -> fromMap(values.stream().collect(toMap(positionExtractor, valueMapper))));
+        super(sourceStreamId, values -> values.stream().collect(toTensor(positionExtractor, valueMapper)));
     }
 }
