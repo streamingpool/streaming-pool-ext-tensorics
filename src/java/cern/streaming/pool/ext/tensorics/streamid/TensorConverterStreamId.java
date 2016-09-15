@@ -5,13 +5,11 @@
 package cern.streaming.pool.ext.tensorics.streamid;
 
 import static java.util.stream.Collectors.toMap;
+import static org.tensorics.core.lang.Tensorics.fromMap;
 
 import java.util.Collection;
-import java.util.Map;
-import java.util.Set;
 import java.util.function.Function;
 
-import org.tensorics.core.lang.Tensorics;
 import org.tensorics.core.tensor.Position;
 import org.tensorics.core.tensor.Tensor;
 
@@ -30,22 +28,6 @@ public class TensorConverterStreamId<T, U> extends DerivedStreamId<Collection<T>
 
     private TensorConverterStreamId(StreamId<Collection<T>> sourceStreamId, Function<T, Position> positionExtractor,
             Function<T, U> valueMapper) {
-        super(sourceStreamId, values -> {
-            Map<Position, U> data = values.stream().collect(toMap(positionExtractor, valueMapper));
-            Set<Class<?>> dimensions = extractDimensionsAndEnsureConsistency(data);
-
-            return Tensorics.fromMap(dimensions, data);
-        });
+        super(sourceStreamId, values -> fromMap(values.stream().collect(toMap(positionExtractor, valueMapper))));
     }
-
-    private static <U> Set<Class<?>> extractDimensionsAndEnsureConsistency(Map<Position, U> data) {
-        Position anyPosition = data.keySet().iterator().next();
-        boolean sameDim = data.keySet().stream().map(Position::dimensionSet).allMatch(anyPosition::isConsistentWith);
-        if (!sameDim) {
-            throw new IllegalArgumentException(
-                    "For converting to a tensor, all the positions must have the same dimensions");
-        }
-        return anyPosition.dimensionSet();
-    }
-
 }
