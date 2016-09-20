@@ -74,4 +74,9 @@ public class StreamIdBasedExpression<R> extends AbstractDeferredExpression<R> {
         return streamId;
     }
 
+    @Override
+    public String toString() {
+        return "StreamIdBasedExpression [streamId=" + streamId + "]";
+    }
+
 }
