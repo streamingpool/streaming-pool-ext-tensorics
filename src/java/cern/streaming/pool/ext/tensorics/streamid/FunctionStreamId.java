@@ -17,6 +17,7 @@ import cern.streaming.pool.core.service.StreamId;
  * @param <X> x values of the resulting {@link DiscreteFunction}
  * @param <Y> y values of the resulting {@link DiscreteFunction}
  */
+@Deprecated
 public class FunctionStreamId<T, X, Y> implements StreamId<DiscreteFunction<X, Y>> {
 
     private final BufferedStreamId<T> sourceStream;

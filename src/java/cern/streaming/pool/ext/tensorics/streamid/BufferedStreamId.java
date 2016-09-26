@@ -19,6 +19,7 @@ import cern.streaming.pool.core.service.StreamId;
  * @author caguiler
  * @param <R> type of the values to buffering
  */
+@Deprecated
 public class BufferedStreamId<R> implements StreamId<List<R>> {
 
     private final StreamId<R> sourceStream;
