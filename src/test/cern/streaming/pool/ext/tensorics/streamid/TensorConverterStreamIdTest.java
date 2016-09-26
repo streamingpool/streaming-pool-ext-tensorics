@@ -36,8 +36,8 @@ public class TensorConverterStreamIdTest extends AbstractStreamTest implements R
 
         StreamId<List<Integer>> dataStreamId = provide(just(data)).withUniqueStreamId();
 
-        TensorConverterStreamId<Integer, Integer> tensorConverterStreamId = TensorConverterStreamId
-                .of(dataStreamId, v -> Position.of(v), identity());
+        TensorConverterStreamId<Integer, Integer> tensorConverterStreamId = TensorConverterStreamId.of(dataStreamId,
+                v -> Position.of(v), identity());
 
         List<Tensor<Integer>> values = valuesOf(tensorConverterStreamId);
 
@@ -49,7 +49,8 @@ public class TensorConverterStreamIdTest extends AbstractStreamTest implements R
     public void testTensoricsInconsistentPosition() {
         List<Integer> data = asList(0, 1, 2, 3);
         List<Position> invalidPositions = asList(Position.of(1), Position.of(""), Position.of(2), Position.empty());
-        StreamId<List<Integer>> dummyStreamId = new StreamId<List<Integer>>() {/**/};
+        StreamId<List<Integer>> dummyStreamId = new StreamId<List<Integer>>() {
+            /**/};
 
         TensorConverterStreamId.of(dummyStreamId, v -> invalidPositions.get(v), identity()).conversion().apply(data);
     }
@@ -64,9 +65,8 @@ public class TensorConverterStreamIdTest extends AbstractStreamTest implements R
         StreamId<String> startId = provide(startStream).withUniqueStreamId();
         StreamId<String> endId = provide(endStream).withUniqueStreamId();
 
-        OverlapBufferStreamId<Long, String> bufferId = OverlapBufferStreamId.of(sourceId, startId, endId);
-        TensorConverterStreamId<Long, Long> tensorId = TensorConverterStreamId.of(bufferId, Position::of,
-                identity());
+        OverlapBufferStreamId<Long> bufferId = OverlapBufferStreamId.of(sourceId, startId, endId);
+        TensorConverterStreamId<Long, Long> tensorId = TensorConverterStreamId.of(bufferId, Position::of, identity());
 
         List<Tensor<Long>> values = valuesOf(tensorId);
 

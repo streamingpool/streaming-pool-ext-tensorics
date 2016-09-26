@@ -18,10 +18,10 @@ import cern.streaming.pool.core.service.streamid.DerivedStreamId;
 public class TensorConverterStreamId<T, U> extends DerivedStreamId<Collection<T>, Tensor<U>> {
 
     public static <T, U, C extends Collection<T>> TensorConverterStreamId<T, U> of(StreamId<C> sourceStreamId,
-            Function<T, Position> positionExtractor, Function<T, U> valueMapper) {
+            Function<T, Position> positionMapper, Function<T, U> valueMapper) {
         @SuppressWarnings("unchecked") /* Enforced by method signature */
         TensorConverterStreamId<T, U> streamId = new TensorConverterStreamId<>((StreamId<Collection<T>>) sourceStreamId,
-                positionExtractor, valueMapper);
+                positionMapper, valueMapper);
         return streamId;
     }
 
