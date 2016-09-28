@@ -21,6 +21,7 @@ import cern.streaming.pool.core.service.StreamId;
 public class DetailedExpressionStreamId<R, E extends Expression<R>> implements StreamId<DetailedExpressionResult<R, E>> {
 
     private final E expression;
+    //private final 
 
     private DetailedExpressionStreamId(E expression) {
         this.expression = requireNonNull(expression, "expression must not be null.");

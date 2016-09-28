@@ -22,6 +22,7 @@ import org.tensorics.core.tensor.Position;
 import org.tensorics.core.tensor.Tensor;
 
 import cern.streaming.pool.core.service.StreamId;
+import cern.streaming.pool.core.service.streamid.BufferSpecification;
 import cern.streaming.pool.core.service.streamid.OverlapBufferStreamId;
 import cern.streaming.pool.core.support.RxStreamSupport;
 import cern.streaming.pool.core.testing.AbstractStreamTest;
@@ -65,7 +66,8 @@ public class TensorConverterStreamIdTest extends AbstractStreamTest implements R
         StreamId<String> startId = provide(startStream).withUniqueStreamId();
         StreamId<String> endId = provide(endStream).withUniqueStreamId();
 
-        OverlapBufferStreamId<Long> bufferId = OverlapBufferStreamId.of(sourceId, startId, endId);
+        OverlapBufferStreamId<Long> bufferId = OverlapBufferStreamId.of(sourceId,
+                BufferSpecification.ofStartAndEnd(startId, endId));
         TensorConverterStreamId<Long, Long> tensorId = TensorConverterStreamId.of(bufferId, Position::of, identity());
 
         List<Tensor<Long>> values = valuesOf(tensorId);
