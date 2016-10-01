@@ -12,6 +12,7 @@ import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.lang3.tuple.Pair;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.springframework.test.context.ContextConfiguration;
 import org.tensorics.core.function.DiscreteFunction;
@@ -60,6 +61,7 @@ public class ContinuousSignalRMSExample extends AbstractStreamTest implements Rx
         provide(valuesWithTimeStamp1).as(ID_VALUES);
     }
 
+    @Ignore("takes forever")
     @Test
     public void continuousRMS() throws InterruptedException {
 

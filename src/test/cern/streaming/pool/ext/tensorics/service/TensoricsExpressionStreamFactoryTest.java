@@ -55,7 +55,7 @@ public class TensoricsExpressionStreamFactoryTest {
 
     @Mock
     private BufferedStreamId<Integer> invalidStreamId;
-    
+
     @Mock
     private DiscoveryService discoveryService;
 
@@ -64,7 +64,7 @@ public class TensoricsExpressionStreamFactoryTest {
     @Before
     public void setUp() {
         factoryUnderTest = new DetailedTensoricsExpressionStreamFactory(ResolvingEngines.defaultEngine());
-        when(expressionBasedStreamId.getExpression()).thenReturn(A_PLUS_B);
+        when(expressionBasedStreamId.expression()).thenReturn(A_PLUS_B);
 
         mockStream1();
         mockStream2();
@@ -102,12 +102,12 @@ public class TensoricsExpressionStreamFactoryTest {
     public void testCanCreateWithWrongStreamIdType() {
         assertFalse(factoryUnderTest.create(invalidStreamId, discoveryService).isPresent());
     }
-    
+
     @Test
     public void testCanCreateWithNull() {
         assertFalse(factoryUnderTest.create(null, discoveryService).isPresent());
     }
-    
+
     private static Expression<Double> mockExpression() {
 
         return new DoubleScript<Double>() {

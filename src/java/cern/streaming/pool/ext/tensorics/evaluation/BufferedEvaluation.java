@@ -6,6 +6,8 @@ package cern.streaming.pool.ext.tensorics.evaluation;
 
 import static java.util.Objects.requireNonNull;
 
+import java.time.Duration;
+
 import cern.streaming.pool.core.service.StreamId;
 import cern.streaming.pool.core.service.streamid.BufferSpecification;
 
@@ -33,6 +35,11 @@ public class BufferedEvaluation implements EvaluationStrategy {
      */
     public static final BufferedEvaluation ofStartAndEnd(StreamId<?> startStreamId, StreamId<?> endStreamId) {
         return new BufferedEvaluation(BufferSpecification.ofStartAndEnd(startStreamId, endStreamId));
+    }
+
+    public static final BufferedEvaluation ofStartAndEndTimeout(StreamId<?> startStreamId, StreamId<?> endStreamId,
+            Duration timeout) {
+        return new BufferedEvaluation(BufferSpecification.ofStartEndTimeout(startStreamId, endStreamId, timeout));
     }
 
     public BufferSpecification bufferSpecification() {
