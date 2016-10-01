@@ -7,9 +7,14 @@ package cern.streaming.pool.ext.tensorics.evaluation;
 import static java.util.Objects.requireNonNull;
 
 import java.time.Duration;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.function.BiPredicate;
 
 import cern.streaming.pool.core.service.StreamId;
 import cern.streaming.pool.core.service.streamid.BufferSpecification;
+import cern.streaming.pool.core.service.streamid.BufferSpecification.EndStreamMatcher;
 
 /**
  * This evaluation strategy allows buffering of streams. To be able to do so, it needs a stream which starts the buffers
@@ -25,25 +30,45 @@ public class BufferedEvaluation implements EvaluationStrategy {
         this.bufferSpecification = requireNonNull(bufferSpecification, "bufferSpecification must not be null");
     }
 
-    /**
-     * Factory method which requires one stream id to start the buffering and one to stop it. The stopId will also
-     * trigger the evaluation.
-     * 
-     * @param startStreamId the id of the stream that starts the buffering
-     * @param endStreamId the id of the stream that ends the buffering
-     * @throws NullPointerException if one of the given ids is {@code null}
-     */
-    public static final BufferedEvaluation ofStartAndEnd(StreamId<?> startStreamId, StreamId<?> endStreamId) {
-        return new BufferedEvaluation(BufferSpecification.ofStartAndEnd(startStreamId, endStreamId));
-    }
-
-    public static final BufferedEvaluation ofStartAndEndTimeout(StreamId<?> startStreamId, StreamId<?> endStreamId,
-            Duration timeout) {
-        return new BufferedEvaluation(BufferSpecification.ofStartEndTimeout(startStreamId, endStreamId, timeout));
-    }
-
     public BufferSpecification bufferSpecification() {
         return bufferSpecification;
+    }
+
+    public static final Builder builder() {
+        return new Builder();
+    }
+
+    public static class Builder extends EvaluationStrategyBuilder {
+
+        private StreamId<?> startStreamId;
+        private Set<BufferSpecification.EndStreamMatcher<?, ?>> endStreamsMatchers = new HashSet<>();
+        private Duration timeout = null;
+
+        public Builder withStartStreamId(StreamId<?> newStartStreamId) {
+            this.startStreamId = newStartStreamId;
+            return this;
+        }
+
+        public Builder withEndMatcher(EndStreamMatcher<?, ?> endMatcher) {
+            this.endStreamsMatchers.add(endMatcher);
+            return this;
+        }
+
+        public Builder withTimeout(Duration newTimeout) {
+            this.timeout = newTimeout;
+            return this;
+        }
+
+        @Override
+        public EvaluationStrategy build() {
+            if (timeout == null) {
+                return new BufferedEvaluation(BufferSpecification.ofStartAndEnd(startStreamId, endStreamsMatchers));
+            } else {
+                return new BufferedEvaluation(
+                        BufferSpecification.ofStartEndTimeout(startStreamId, endStreamsMatchers, timeout));
+            }
+        }
+
     }
 
 }

@@ -37,4 +37,24 @@ public class TriggeredEvaluation implements EvaluationStrategy {
         return triggeringStreamId;
     }
 
+    public static final Builder builder() {
+        return new Builder();
+    }
+
+    public static class Builder extends EvaluationStrategyBuilder {
+
+        private StreamId<?> triggeringStreamId;
+
+        public Builder withTriggeringStreamId(StreamId<?> newTriggeringStreamId) {
+            this.triggeringStreamId = newTriggeringStreamId;
+            return this;
+        }
+
+        @Override
+        public EvaluationStrategy build() {
+            return triggeredBy(triggeringStreamId);
+        }
+
+    }
+
 }

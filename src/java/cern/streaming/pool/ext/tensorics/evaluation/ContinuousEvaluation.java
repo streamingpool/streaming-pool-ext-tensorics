@@ -26,4 +26,17 @@ public class ContinuousEvaluation implements EvaluationStrategy {
     public static final ContinuousEvaluation instance() {
         return INSTANCE;
     }
+
+    public static final Builder builder() {
+        return new Builder();
+    }
+
+    public static class Builder extends EvaluationStrategyBuilder {
+
+        @Override
+        public EvaluationStrategy build() {
+            return instance();
+        }
+    }
+
 }

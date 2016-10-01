@@ -12,6 +12,7 @@ import static org.hamcrest.CoreMatchers.instanceOf;
 import static rx.Observable.combineLatest;
 
 import java.nio.channels.OverlappingFileLockException;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -118,7 +119,7 @@ public class DetailedTensoricsExpressionStreamFactory implements StreamFactory {
         if (strategy instanceof BufferedEvaluation) {
             List<? extends Observable<?>> triggeringObservables = observables.entrySet().stream()
                     .filter(e -> (e.getKey() instanceof OverlapBufferStreamId)).map(Entry::getValue).collect(toList());
-            return Observable.zip(triggeringObservables, TRIGGER_CONTEXT_COMBINER);
+            return Observable.zip(triggeringObservables, TRIGGER_CONTEXT_COMBINER).doOnNext(v ->System.out.println("Trigger: "+Instant.now()));
         }
         if (strategy instanceof TriggeredEvaluation) {
             return rxFrom(discoveryService.discover(((TriggeredEvaluation) strategy).triggeringStreamId()));

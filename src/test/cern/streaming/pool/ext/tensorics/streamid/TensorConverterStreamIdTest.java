@@ -15,6 +15,7 @@ import static rx.Observable.merge;
 import static rx.Observable.never;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import org.junit.Test;
@@ -24,6 +25,7 @@ import org.tensorics.core.tensor.Tensor;
 import cern.streaming.pool.core.service.StreamId;
 import cern.streaming.pool.core.service.streamid.BufferSpecification;
 import cern.streaming.pool.core.service.streamid.OverlapBufferStreamId;
+import cern.streaming.pool.core.service.streamid.BufferSpecification.EndStreamMatcher;
 import cern.streaming.pool.core.support.RxStreamSupport;
 import cern.streaming.pool.core.testing.AbstractStreamTest;
 import cern.streaming.pool.core.testing.subscriber.BlockingTestSubscriber;
@@ -66,8 +68,8 @@ public class TensorConverterStreamIdTest extends AbstractStreamTest implements R
         StreamId<String> startId = provide(startStream).withUniqueStreamId();
         StreamId<String> endId = provide(endStream).withUniqueStreamId();
 
-        OverlapBufferStreamId<Long> bufferId = OverlapBufferStreamId.of(sourceId,
-                BufferSpecification.ofStartAndEnd(startId, endId));
+        OverlapBufferStreamId<Long> bufferId = OverlapBufferStreamId.of(sourceId, BufferSpecification
+                .ofStartAndEnd(startId, Collections.singleton(EndStreamMatcher.alwaysEndingOn(endId))));
         TensorConverterStreamId<Long, Long> tensorId = TensorConverterStreamId.of(bufferId, Position::of, identity());
 
         List<Tensor<Long>> values = valuesOf(tensorId);
