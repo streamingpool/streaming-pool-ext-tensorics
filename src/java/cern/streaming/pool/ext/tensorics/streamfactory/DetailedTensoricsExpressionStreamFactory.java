@@ -8,12 +8,9 @@ import static cern.streaming.pool.core.service.util.ReactiveStreams.fromRx;
 import static cern.streaming.pool.core.service.util.ReactiveStreams.rxFrom;
 import static java.util.Optional.of;
 import static java.util.stream.Collectors.toList;
-import static org.hamcrest.CoreMatchers.instanceOf;
 import static rx.Observable.combineLatest;
 
-import java.nio.channels.OverlappingFileLockException;
 import java.time.Instant;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -32,6 +29,8 @@ import org.tensorics.core.tree.domain.Expression;
 import org.tensorics.core.tree.domain.Node;
 import org.tensorics.core.tree.domain.ResolvingContext;
 import org.tensorics.core.tree.walking.Trees;
+
+import com.google.common.collect.ImmutableSet;
 
 import cern.streaming.pool.core.service.DiscoveryService;
 import cern.streaming.pool.core.service.ReactiveStream;
@@ -100,7 +99,6 @@ public class DetailedTensoricsExpressionStreamFactory implements StreamFactory {
         return triggerObservable(observableEntries, id.evaluationStrategy(), discoveryService)
                 .withLatestFrom(observableEntries.values().toArray(new Observable[] {}), CONTEXT_COMBINER)
                 .map(ctx -> engine.resolveDetailed(expression, ctx, EXCEPTION_HANDLING_STRATEGY));
-
     }
 
     private <E extends Expression<?>> Map<StreamIdBasedExpression<Object>, StreamId<Object>> streamIdsFrom(
@@ -119,7 +117,8 @@ public class DetailedTensoricsExpressionStreamFactory implements StreamFactory {
         if (strategy instanceof BufferedEvaluation) {
             List<? extends Observable<?>> triggeringObservables = observables.entrySet().stream()
                     .filter(e -> (e.getKey() instanceof OverlapBufferStreamId)).map(Entry::getValue).collect(toList());
-            return Observable.zip(triggeringObservables, TRIGGER_CONTEXT_COMBINER).doOnNext(v ->System.out.println("Trigger: "+Instant.now()));
+            return Observable.zip(triggeringObservables, ImmutableSet::of)
+                    .doOnNext(v -> System.out.println("Trigger: " + Instant.now() + " item: " + v));
         }
         if (strategy instanceof TriggeredEvaluation) {
             return rxFrom(discoveryService.discover(((TriggeredEvaluation) strategy).triggeringStreamId()));

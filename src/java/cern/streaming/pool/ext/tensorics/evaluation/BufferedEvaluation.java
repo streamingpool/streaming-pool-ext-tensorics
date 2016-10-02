@@ -7,14 +7,14 @@ package cern.streaming.pool.ext.tensorics.evaluation;
 import static java.util.Objects.requireNonNull;
 
 import java.time.Duration;
-import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.Set;
-import java.util.function.BiPredicate;
 
 import cern.streaming.pool.core.service.StreamId;
 import cern.streaming.pool.core.service.streamid.BufferSpecification;
 import cern.streaming.pool.core.service.streamid.BufferSpecification.EndStreamMatcher;
+import cern.streaming.pool.core.service.streamid.DelayedStreamId;
 
 /**
  * This evaluation strategy allows buffering of streams. To be able to do so, it needs a stream which starts the buffers
@@ -62,7 +62,7 @@ public class BufferedEvaluation implements EvaluationStrategy {
         @Override
         public EvaluationStrategy build() {
             if (timeout == null) {
-                return new BufferedEvaluation(BufferSpecification.ofStartAndEnd(startStreamId, endStreamsMatchers));
+                return new BufferedEvaluation(BufferSpecification.ofStartEnd(startStreamId, endStreamsMatchers));
             } else {
                 return new BufferedEvaluation(
                         BufferSpecification.ofStartEndTimeout(startStreamId, endStreamsMatchers, timeout));

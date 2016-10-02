@@ -69,7 +69,7 @@ public class TensorConverterStreamIdTest extends AbstractStreamTest implements R
         StreamId<String> endId = provide(endStream).withUniqueStreamId();
 
         OverlapBufferStreamId<Long> bufferId = OverlapBufferStreamId.of(sourceId, BufferSpecification
-                .ofStartAndEnd(startId, Collections.singleton(EndStreamMatcher.alwaysEndingOn(endId))));
+                .ofStartEnd(startId, Collections.singleton(EndStreamMatcher.endingOnEvery(endId))));
         TensorConverterStreamId<Long, Long> tensorId = TensorConverterStreamId.of(bufferId, Position::of, identity());
 
         List<Tensor<Long>> values = valuesOf(tensorId);

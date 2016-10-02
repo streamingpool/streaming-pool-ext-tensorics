@@ -27,6 +27,7 @@ import cern.streaming.pool.core.service.ReactiveStream;
 import cern.streaming.pool.core.service.StreamId;
 import cern.streaming.pool.core.service.util.ReactiveStreams;
 import cern.streaming.pool.core.testing.NamedStreamId;
+import cern.streaming.pool.ext.tensorics.evaluation.EvaluationStrategies;
 import cern.streaming.pool.ext.tensorics.expression.StreamIdBasedExpression;
 import cern.streaming.pool.ext.tensorics.streamfactory.DetailedTensoricsExpressionStreamFactory;
 import cern.streaming.pool.ext.tensorics.streamfactory.TensoricsExpressionStreamFactory;
@@ -65,6 +66,7 @@ public class TensoricsExpressionStreamFactoryTest {
     public void setUp() {
         factoryUnderTest = new DetailedTensoricsExpressionStreamFactory(ResolvingEngines.defaultEngine());
         when(expressionBasedStreamId.expression()).thenReturn(A_PLUS_B);
+        when(expressionBasedStreamId.evaluationStrategy()).thenReturn(EvaluationStrategies.defaultEvaluation());
 
         mockStream1();
         mockStream2();
