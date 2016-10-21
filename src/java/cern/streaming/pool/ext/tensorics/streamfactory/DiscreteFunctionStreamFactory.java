@@ -28,6 +28,7 @@ import rx.Observable;
  * 
  * @author caguiler, kfuchsbe
  */
+@Deprecated
 public class DiscreteFunctionStreamFactory implements StreamFactory {
 
     /* Safe, manually checked */

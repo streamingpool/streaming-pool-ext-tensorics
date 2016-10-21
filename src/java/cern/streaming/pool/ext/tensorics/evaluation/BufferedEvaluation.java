@@ -8,13 +8,11 @@ import static java.util.Objects.requireNonNull;
 
 import java.time.Duration;
 import java.util.HashSet;
-import java.util.Objects;
 import java.util.Set;
 
 import cern.streaming.pool.core.service.StreamId;
 import cern.streaming.pool.core.service.streamid.BufferSpecification;
 import cern.streaming.pool.core.service.streamid.BufferSpecification.EndStreamMatcher;
-import cern.streaming.pool.core.service.streamid.DelayedStreamId;
 
 /**
  * This evaluation strategy allows buffering of streams. To be able to do so, it needs a stream which starts the buffers

@@ -23,6 +23,7 @@ import cern.streaming.pool.ext.tensorics.streamid.BufferedStreamId;
  * 
  * @author caguiler, kfuchsbe
  */
+@Deprecated
 public class TensoricsBufferedStreamFactory implements StreamFactory {
 
     /* Safe, manually checked */

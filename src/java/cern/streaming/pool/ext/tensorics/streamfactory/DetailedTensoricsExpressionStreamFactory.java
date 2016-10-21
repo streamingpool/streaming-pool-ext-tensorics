@@ -9,8 +9,8 @@ import static cern.streaming.pool.core.service.util.ReactiveStreams.rxFrom;
 import static java.util.Optional.of;
 import static java.util.stream.Collectors.toList;
 import static rx.Observable.combineLatest;
+import static rx.Observable.zip;
 
-import java.time.Instant;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -101,6 +101,7 @@ public class DetailedTensoricsExpressionStreamFactory implements StreamFactory {
                 .map(ctx -> engine.resolveDetailed(expression, ctx, EXCEPTION_HANDLING_STRATEGY));
     }
 
+    @SuppressWarnings("unchecked")
     private <E extends Expression<?>> Map<StreamIdBasedExpression<Object>, StreamId<Object>> streamIdsFrom(
             E expression) {
         Collection<Node> leaves = Trees.findBottomNodes(expression);
@@ -117,8 +118,7 @@ public class DetailedTensoricsExpressionStreamFactory implements StreamFactory {
         if (strategy instanceof BufferedEvaluation) {
             List<? extends Observable<?>> triggeringObservables = observables.entrySet().stream()
                     .filter(e -> (e.getKey() instanceof OverlapBufferStreamId)).map(Entry::getValue).collect(toList());
-            return Observable.zip(triggeringObservables, ImmutableSet::of)
-                    .doOnNext(v -> System.out.println("Trigger: " + Instant.now() + " item: " + v));
+            return zip(triggeringObservables, ImmutableSet::of);
         }
         if (strategy instanceof TriggeredEvaluation) {
             return rxFrom(discoveryService.discover(((TriggeredEvaluation) strategy).triggeringStreamId()));
