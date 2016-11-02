@@ -26,7 +26,7 @@ public class DetailedExpressionStreamId<R, E extends Expression<R>>
     private final E expression;
     private final EvaluationStrategy evaluationStrategy;
 
-    private DetailedExpressionStreamId(E expression, EvaluationStrategy evaluationStrategy) {
+    protected DetailedExpressionStreamId(E expression, EvaluationStrategy evaluationStrategy) {
         this.expression = requireNonNull(expression, "expression must not be null.");
         this.evaluationStrategy = requireNonNull(evaluationStrategy, "evaluationStrategy must not be null.");
     }
