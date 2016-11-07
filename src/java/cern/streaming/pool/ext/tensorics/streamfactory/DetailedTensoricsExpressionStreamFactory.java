@@ -41,6 +41,7 @@ import cern.streaming.pool.ext.tensorics.evaluation.BufferedEvaluation;
 import cern.streaming.pool.ext.tensorics.evaluation.ContinuousEvaluation;
 import cern.streaming.pool.ext.tensorics.evaluation.EvaluationStrategy;
 import cern.streaming.pool.ext.tensorics.evaluation.TriggeredEvaluation;
+import cern.streaming.pool.ext.tensorics.exception.NoBufferedStreamSpecifiedException;
 import cern.streaming.pool.ext.tensorics.expression.StreamIdBasedExpression;
 import cern.streaming.pool.ext.tensorics.streamid.DetailedExpressionStreamId;
 import rx.Observable;
@@ -118,6 +119,9 @@ public class DetailedTensoricsExpressionStreamFactory implements StreamFactory {
         if (strategy instanceof BufferedEvaluation) {
             List<? extends Observable<?>> triggeringObservables = observables.entrySet().stream()
                     .filter(e -> (e.getKey() instanceof OverlapBufferStreamId)).map(Entry::getValue).collect(toList());
+            if(triggeringObservables.isEmpty()) {
+                throw new NoBufferedStreamSpecifiedException();
+            }
             return zip(triggeringObservables, ImmutableSet::of);
         }
         if (strategy instanceof TriggeredEvaluation) {
