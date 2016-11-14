@@ -19,7 +19,6 @@ import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import org.assertj.core.util.Objects;
 import org.tensorics.core.resolve.domain.DetailedExpressionResult;
 import org.tensorics.core.resolve.engine.ResolvingEngine;
 import org.tensorics.core.resolve.options.HandleWithFirstCapableAncestorStrategy;
@@ -61,8 +60,8 @@ public class DetailedTensoricsExpressionStreamFactory implements StreamFactory {
     private static final FuncN<ResolvingContext> CONTEXT_COMBINER = (Object... entriesToCombine) -> {
         EditableResolvingContext context = Contexts.newResolvingContext();
         for (Object entry : entriesToCombine) {
-            ExpToValue castedEntry = Objects.castIfBelongsToType(entry, ExpToValue.class);
-            if (castedEntry != null) {
+            if (entry instanceof ExpToValue) {
+                ExpToValue castedEntry = (ExpToValue) entry;
                 context.put(castedEntry.node, castedEntry.value);
             }
         }
