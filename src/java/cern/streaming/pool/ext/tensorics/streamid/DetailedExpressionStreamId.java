@@ -8,6 +8,8 @@ import static java.util.Objects.requireNonNull;
 
 import org.tensorics.core.resolve.domain.DetailedExpressionResult;
 import org.tensorics.core.tree.domain.Expression;
+import org.tensorics.core.tree.domain.ResolvingContext;
+import org.tensorics.core.tree.domain.ResolvingContextImpl;
 
 import cern.streaming.pool.core.service.StreamId;
 import cern.streaming.pool.ext.tensorics.evaluation.EvaluationStrategies;
@@ -16,7 +18,7 @@ import cern.streaming.pool.ext.tensorics.evaluation.EvaluationStrategy;
 /**
  * A {@link StreamId} that encapsulates an {@link Expression} and provides detailed information about its resolution (
  * {@link DetailedResolvedExpression}).
- * 
+ *
  * @param <R> the type of the data the source expression resolves
  * @param <E> the type of the expression that is wrapped
  */
@@ -25,8 +27,15 @@ public class DetailedExpressionStreamId<R, E extends Expression<R>>
 
     private final E expression;
     private final EvaluationStrategy evaluationStrategy;
+    private final ResolvingContext initialCtx;
 
     protected DetailedExpressionStreamId(E expression, EvaluationStrategy evaluationStrategy) {
+        this(expression, evaluationStrategy, new ResolvingContextImpl());
+    }
+
+    protected DetailedExpressionStreamId(E expression, EvaluationStrategy evaluationStrategy,
+            ResolvingContext initialCtx) {
+        this.initialCtx = requireNonNull(initialCtx, "initialCtx must not be null.");
         this.expression = requireNonNull(expression, "expression must not be null.");
         this.evaluationStrategy = requireNonNull(evaluationStrategy, "evaluationStrategy must not be null.");
     }
@@ -46,6 +55,10 @@ public class DetailedExpressionStreamId<R, E extends Expression<R>>
 
     public EvaluationStrategy evaluationStrategy() {
         return evaluationStrategy;
+    }
+
+    public ResolvingContext initialCtx() {
+        return initialCtx;
     }
 
     @Override

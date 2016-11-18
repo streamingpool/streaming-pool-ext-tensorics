@@ -8,6 +8,7 @@ import static cern.streaming.pool.core.service.util.ReactiveStreams.fromRx;
 import static cern.streaming.pool.core.service.util.ReactiveStreams.rxFrom;
 import static java.util.Optional.of;
 import static java.util.stream.Collectors.toList;
+import static java.util.stream.Collectors.toMap;
 import static rx.Observable.combineLatest;
 import static rx.Observable.zip;
 
@@ -41,8 +42,10 @@ import cern.streaming.pool.ext.tensorics.evaluation.ContinuousEvaluation;
 import cern.streaming.pool.ext.tensorics.evaluation.EvaluationStrategy;
 import cern.streaming.pool.ext.tensorics.evaluation.TriggeredEvaluation;
 import cern.streaming.pool.ext.tensorics.exception.NoBufferedStreamSpecifiedException;
+import cern.streaming.pool.ext.tensorics.expression.ResolvablePlaceholder;
 import cern.streaming.pool.ext.tensorics.expression.StreamIdBasedExpression;
 import cern.streaming.pool.ext.tensorics.streamid.DetailedExpressionStreamId;
+import cern.streaming.pool.ext.tensorics.support.TensoricsTreeSupport;
 import rx.Observable;
 import rx.functions.FuncN;
 
@@ -86,13 +89,12 @@ public class DetailedTensoricsExpressionStreamFactory implements StreamFactory {
     private <T, E extends Expression<T>> Observable<DetailedExpressionResult<T, E>> resolvedStream(
             DetailedExpressionStreamId<T, E> id, DiscoveryService discoveryService) {
         E expression = id.expression();
-
-        Map<StreamIdBasedExpression<Object>, StreamId<Object>> streamIds = streamIdsFrom(expression);
-
+        Map<Expression<Object>, StreamId<Object>> streamIds = streamIdsFrom(id);
         Map<StreamId<?>, Observable<ExpToValue>> observableEntries = new HashMap<>();
-        for (Entry<StreamIdBasedExpression<Object>, StreamId<Object>> entry : streamIds.entrySet()) {
+        for (Entry<Expression<Object>, StreamId<Object>> entry : streamIds.entrySet()) {
             Observable<?> plainObservable = rxFrom(discoveryService.discover(entry.getValue()));
-            Observable<ExpToValue> mappedObservable = plainObservable.map(obj -> new ExpToValue(entry.getKey(), obj));
+            Observable<ExpToValue> mappedObservable;
+            mappedObservable = plainObservable.map(obj -> new ExpToValue(entry.getKey(), obj));
             observableEntries.put(entry.getValue(), mappedObservable);
         }
 
@@ -101,13 +103,38 @@ public class DetailedTensoricsExpressionStreamFactory implements StreamFactory {
                 .map(ctx -> engine.resolveDetailed(expression, ctx, EXCEPTION_HANDLING_STRATEGY));
     }
 
+    private <T extends Expression<?>> Map<Expression<Object>, StreamId<Object>> streamIdsFrom(
+            DetailedExpressionStreamId<?, T> id) {
+        HashMap<Expression<Object>, StreamId<Object>> result = new HashMap<>();
+        result.putAll(streamIdsFromStreamIdBaseExpression(id));
+        result.putAll(streamIdsFromResolvablePlaceholders(id));
+        return result;
+    }
+
     @SuppressWarnings("unchecked")
-    private <E extends Expression<?>> Map<StreamIdBasedExpression<Object>, StreamId<Object>> streamIdsFrom(
-            E expression) {
-        Collection<Node> leaves = Trees.findBottomNodes(expression);
+    private <T extends Expression<?>> Map<Expression<Object>, StreamId<Object>> streamIdsFromStreamIdBaseExpression(
+            DetailedExpressionStreamId<?, T> id) {
+        Collection<Node> leaves = Trees.findBottomNodes(id.expression());
+
         return leaves.stream().filter(node -> node instanceof StreamIdBasedExpression)
                 .map(node -> (StreamIdBasedExpression<Object>) node)
                 .collect(Collectors.toMap(exp -> exp, exp -> exp.streamId()));
+    }
+
+    @SuppressWarnings({ "unchecked", "rawtypes" })
+    private <T extends Expression<?>> Map<Expression<Object>, StreamId<Object>> streamIdsFromResolvablePlaceholders(
+            DetailedExpressionStreamId<?, T> id) {
+
+        ResolvingContext resolvedContextForResolvableExpressions = id.initialCtx();
+
+        List<ResolvablePlaceholder> resolvableExpressions = TensoricsTreeSupport.getNodesOfClass(id.expression(),
+                ResolvablePlaceholder.class);
+
+        return resolvableExpressions.stream().map(node -> (ResolvablePlaceholder<StreamId<Object>>) node).collect(
+                toMap(resolvableExpression -> (Expression<Object>) resolvableExpression, resolvableExpression -> {
+                    return resolvedContextForResolvableExpressions
+                            .resolvedValueOf(resolvableExpression.resolvableExpression());
+                }));
     }
 
     private static final Observable<?> triggerObservable(Map<StreamId<?>, ? extends Observable<?>> observables,
@@ -118,7 +145,7 @@ public class DetailedTensoricsExpressionStreamFactory implements StreamFactory {
         if (strategy instanceof BufferedEvaluation) {
             List<? extends Observable<?>> triggeringObservables = observables.entrySet().stream()
                     .filter(e -> (e.getKey() instanceof OverlapBufferStreamId)).map(Entry::getValue).collect(toList());
-            if(triggeringObservables.isEmpty()) {
+            if (triggeringObservables.isEmpty()) {
                 throw new NoBufferedStreamSpecifiedException();
             }
             return zip(triggeringObservables, ImmutableSet::of);
@@ -132,13 +159,13 @@ public class DetailedTensoricsExpressionStreamFactory implements StreamFactory {
 
     private static final class ExpToValue {
 
-        public ExpToValue(StreamIdBasedExpression<Object> node, Object value) {
+        public ExpToValue(Expression<Object> node, Object value) {
             super();
             this.node = node;
             this.value = value;
         }
 
-        private final StreamIdBasedExpression<Object> node;
+        private final Expression<Object> node;
         private final Object value;
     }
 
