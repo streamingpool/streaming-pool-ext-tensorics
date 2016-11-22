@@ -28,6 +28,7 @@ import org.tensorics.core.tree.domain.EditableResolvingContext;
 import org.tensorics.core.tree.domain.Expression;
 import org.tensorics.core.tree.domain.ResolvingContext;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableMap.Builder;
 import com.google.common.collect.ImmutableSet;
@@ -104,6 +105,7 @@ public class DetailedTensoricsExpressionStreamFactory implements StreamFactory {
 
     /* package visibility for testing */
     @SuppressWarnings({ "unchecked", "rawtypes" })
+    @VisibleForTesting
     <T extends Expression<?>> Map<Expression<Object>, StreamId<Object>> streamIdsFrom(
             DetailedExpressionStreamId<?, T> id) {
         Expression<?> rootExpression = id.expression();
