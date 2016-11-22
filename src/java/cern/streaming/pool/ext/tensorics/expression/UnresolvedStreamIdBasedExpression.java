@@ -27,7 +27,7 @@ public class UnresolvedStreamIdBasedExpression<T> extends AbstractDeferredExpres
 
     @Override
     public List<? extends Node> getChildren() {
-        return Collections.emptyList();
+        return Collections.singletonList(streamIdExpression);
     }
 
     @Override
@@ -40,19 +40,29 @@ public class UnresolvedStreamIdBasedExpression<T> extends AbstractDeferredExpres
 
     @Override
     public boolean equals(Object obj) {
-        if (this == obj)
+        if (this == obj) {
             return true;
-        if (obj == null)
+        }
+        if (obj == null) {
             return false;
-        if (getClass() != obj.getClass())
+        }
+        if (getClass() != obj.getClass()) {
             return false;
+        }
         UnresolvedStreamIdBasedExpression<?> other = (UnresolvedStreamIdBasedExpression<?>) obj;
         if (streamIdExpression == null) {
-            if (other.streamIdExpression != null)
+            if (other.streamIdExpression != null) {
                 return false;
-        } else if (!streamIdExpression.equals(other.streamIdExpression))
+            }
+        } else if (!streamIdExpression.equals(other.streamIdExpression)) {
             return false;
+        }
         return true;
+    }
+
+    @Override
+    public String toString() {
+        return "UnresolvedStreamIdBasedExpression [streamIdExpression=" + streamIdExpression + "]";
     }
 
 }
