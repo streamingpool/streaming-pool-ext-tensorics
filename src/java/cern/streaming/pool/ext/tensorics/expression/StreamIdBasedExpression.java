@@ -26,7 +26,7 @@ public class StreamIdBasedExpression<R> extends AbstractDeferredExpression<R> {
 
     private final StreamId<R> streamId;
 
-    private StreamIdBasedExpression(StreamId<R> streamId) {
+    protected StreamIdBasedExpression(StreamId<R> streamId) {
         super();
         this.streamId = requireNonNull(streamId, "streamId must not be null.");
     }
