@@ -15,6 +15,7 @@ import java.util.Map;
 
 import org.junit.Test;
 import org.tensorics.core.tree.domain.AbstractDeferredExpression;
+import org.tensorics.core.tree.domain.Contexts;
 import org.tensorics.core.tree.domain.EditableResolvingContext;
 import org.tensorics.core.tree.domain.Expression;
 import org.tensorics.core.tree.domain.Node;
@@ -26,7 +27,7 @@ import cern.streaming.pool.ext.tensorics.expression.StreamIdBasedExpression;
 import cern.streaming.pool.ext.tensorics.expression.UnresolvedStreamIdBasedExpression;
 import cern.streaming.pool.ext.tensorics.streamid.DetailedExpressionStreamId;
 
-public class DetailedTensoricsExpressionStreamFactoryStreamIdExtractionTest {
+public class DetailedTensoricsExpressionStreamFactoryUnresolvedStreamIdExpressionTest {
 
     private static final DetailedTensoricsExpressionStreamFactory DETAILED_TENSORICS_EXPRESSION_STREAM_FACTORY = new DetailedTensoricsExpressionStreamFactory(
             defaultEngine());
@@ -44,7 +45,7 @@ public class DetailedTensoricsExpressionStreamFactoryStreamIdExtractionTest {
         StreamId<Object> streamIdA = mockStreamId();
         Expression<StreamId<Object>> streamExpressionA = mockStreamIdExpression();
 
-        EditableResolvingContext initialCtx = new ResolvingContextImpl();
+        EditableResolvingContext initialCtx = Contexts.newResolvingContext();
         initialCtx.put(streamExpressionA, streamIdA);
 
         UnresolvedStreamIdBasedExpression<Object> unresolvedExpressionA = new UnresolvedStreamIdBasedExpression<>(
@@ -61,7 +62,7 @@ public class DetailedTensoricsExpressionStreamFactoryStreamIdExtractionTest {
         StreamId<Object> streamIdB = mockStreamId();
         Expression<StreamId<Object>> streamExpressionB = mockStreamIdExpression();
 
-        EditableResolvingContext initialCtx = new ResolvingContextImpl();
+        EditableResolvingContext initialCtx = Contexts.newResolvingContext();
         initialCtx.put(streamExpressionB, streamIdB);
 
         UnresolvedStreamIdBasedExpression<Object> unresolvedExpressionB = new UnresolvedStreamIdBasedExpression<>(

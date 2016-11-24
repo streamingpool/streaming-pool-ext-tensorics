@@ -89,6 +89,8 @@ public class DetailedTensoricsExpressionStreamFactory implements StreamFactory {
     private <T, E extends Expression<T>> Observable<DetailedExpressionResult<T, E>> resolvedStream(
             DetailedExpressionStreamId<T, E> id, DiscoveryService discoveryService) {
         E expression = id.expression();
+        ResolvingContext initialCtx = id.initialCtx();
+
         Map<Expression<Object>, StreamId<Object>> streamIds = streamIdsFrom(id);
         Map<StreamId<?>, Observable<ExpToValue>> observableEntries = new HashMap<>();
         for (Entry<Expression<Object>, StreamId<Object>> entry : streamIds.entrySet()) {
@@ -99,8 +101,12 @@ public class DetailedTensoricsExpressionStreamFactory implements StreamFactory {
         }
 
         return triggerObservable(observableEntries, id.evaluationStrategy(), discoveryService)
-                .withLatestFrom(observableEntries.values().toArray(new Observable[] {}), CONTEXT_COMBINER)
-                .map(ctx -> engine.resolveDetailed(expression, ctx, EXCEPTION_HANDLING_STRATEGY));
+                .withLatestFrom(observableEntries.values().toArray(new Observable[] {}), CONTEXT_COMBINER).map(ctx -> {
+                    EditableResolvingContext fullContext = Contexts.newResolvingContext();
+                    fullContext.putAllNew(ctx);
+                    fullContext.putAllNew(initialCtx);
+                    return engine.resolveDetailed(expression, fullContext, EXCEPTION_HANDLING_STRATEGY);
+                });
     }
 
     /* package visibility for testing */
