@@ -7,9 +7,9 @@ package cern.streaming.pool.ext.tensorics.streamid;
 import static java.util.Objects.requireNonNull;
 
 import org.tensorics.core.resolve.domain.DetailedExpressionResult;
+import org.tensorics.core.tree.domain.Contexts;
 import org.tensorics.core.tree.domain.Expression;
 import org.tensorics.core.tree.domain.ResolvingContext;
-import org.tensorics.core.tree.domain.ResolvingContextImpl;
 
 import cern.streaming.pool.core.service.StreamId;
 import cern.streaming.pool.ext.tensorics.evaluation.EvaluationStrategies;
@@ -29,10 +29,6 @@ public class DetailedExpressionStreamId<R, E extends Expression<R>>
     private final EvaluationStrategy evaluationStrategy;
     private final ResolvingContext initialCtx;
 
-    protected DetailedExpressionStreamId(E expression, EvaluationStrategy evaluationStrategy) {
-        this(expression, evaluationStrategy, new ResolvingContextImpl());
-    }
-
     protected DetailedExpressionStreamId(E expression, EvaluationStrategy evaluationStrategy,
             ResolvingContext initialCtx) {
         this.initialCtx = requireNonNull(initialCtx, "initialCtx must not be null.");
@@ -46,7 +42,12 @@ public class DetailedExpressionStreamId<R, E extends Expression<R>>
 
     public static <R, E extends Expression<R>> DetailedExpressionStreamId<R, E> of(E expression,
             EvaluationStrategy evaluationStrategy) {
-        return new DetailedExpressionStreamId<>(expression, evaluationStrategy);
+        return new DetailedExpressionStreamId<>(expression, evaluationStrategy, Contexts.newResolvingContext());
+    }
+
+    public static <R, E extends Expression<R>> DetailedExpressionStreamId<R, E> of(E expression,
+            EvaluationStrategy evaluationStrategy, ResolvingContext initialCtx) {
+        return new DetailedExpressionStreamId<>(expression, evaluationStrategy, initialCtx);
     }
 
     public E expression() {

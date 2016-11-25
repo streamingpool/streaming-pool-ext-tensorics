@@ -6,9 +6,9 @@ package cern.streaming.pool.ext.tensorics.streamfactory;
 
 import static cern.streaming.pool.core.service.util.ReactiveStreams.fromRx;
 import static cern.streaming.pool.core.service.util.ReactiveStreams.rxFrom;
+import static java.lang.String.format;
 import static java.util.Optional.of;
 import static java.util.stream.Collectors.toList;
-import static java.util.stream.Collectors.toMap;
 import static rx.Observable.combineLatest;
 import static rx.Observable.zip;
 
@@ -18,18 +18,19 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import org.tensorics.core.resolve.domain.DetailedExpressionResult;
+import org.tensorics.core.resolve.engine.ResolvedContextDidNotGrowException;
 import org.tensorics.core.resolve.engine.ResolvingEngine;
 import org.tensorics.core.resolve.options.HandleWithFirstCapableAncestorStrategy;
 import org.tensorics.core.tree.domain.Contexts;
 import org.tensorics.core.tree.domain.EditableResolvingContext;
 import org.tensorics.core.tree.domain.Expression;
-import org.tensorics.core.tree.domain.Node;
 import org.tensorics.core.tree.domain.ResolvingContext;
-import org.tensorics.core.tree.walking.Trees;
 
+import com.google.common.annotations.VisibleForTesting;
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableMap.Builder;
 import com.google.common.collect.ImmutableSet;
 
 import cern.streaming.pool.core.service.DiscoveryService;
@@ -42,8 +43,7 @@ import cern.streaming.pool.ext.tensorics.evaluation.ContinuousEvaluation;
 import cern.streaming.pool.ext.tensorics.evaluation.EvaluationStrategy;
 import cern.streaming.pool.ext.tensorics.evaluation.TriggeredEvaluation;
 import cern.streaming.pool.ext.tensorics.exception.NoBufferedStreamSpecifiedException;
-import cern.streaming.pool.ext.tensorics.expression.ResolvablePlaceholder;
-import cern.streaming.pool.ext.tensorics.expression.StreamIdBasedExpression;
+import cern.streaming.pool.ext.tensorics.expression.UnresolvedStreamIdBasedExpression;
 import cern.streaming.pool.ext.tensorics.streamid.DetailedExpressionStreamId;
 import cern.streaming.pool.ext.tensorics.support.TensoricsTreeSupport;
 import rx.Observable;
@@ -89,6 +89,8 @@ public class DetailedTensoricsExpressionStreamFactory implements StreamFactory {
     private <T, E extends Expression<T>> Observable<DetailedExpressionResult<T, E>> resolvedStream(
             DetailedExpressionStreamId<T, E> id, DiscoveryService discoveryService) {
         E expression = id.expression();
+        ResolvingContext initialCtx = id.initialCtx();
+
         Map<Expression<Object>, StreamId<Object>> streamIds = streamIdsFrom(id);
         Map<StreamId<?>, Observable<ExpToValue>> observableEntries = new HashMap<>();
         for (Entry<Expression<Object>, StreamId<Object>> entry : streamIds.entrySet()) {
@@ -99,42 +101,39 @@ public class DetailedTensoricsExpressionStreamFactory implements StreamFactory {
         }
 
         return triggerObservable(observableEntries, id.evaluationStrategy(), discoveryService)
-                .withLatestFrom(observableEntries.values().toArray(new Observable[] {}), CONTEXT_COMBINER)
-                .map(ctx -> engine.resolveDetailed(expression, ctx, EXCEPTION_HANDLING_STRATEGY));
+                .withLatestFrom(observableEntries.values().toArray(new Observable[] {}), CONTEXT_COMBINER).map(ctx -> {
+                    EditableResolvingContext fullContext = Contexts.newResolvingContext();
+                    fullContext.putAllNew(ctx);
+                    fullContext.putAllNew(initialCtx);
+                    return engine.resolveDetailed(expression, fullContext, EXCEPTION_HANDLING_STRATEGY);
+                });
     }
 
-    private <T extends Expression<?>> Map<Expression<Object>, StreamId<Object>> streamIdsFrom(
-            DetailedExpressionStreamId<?, T> id) {
-        HashMap<Expression<Object>, StreamId<Object>> result = new HashMap<>();
-        result.putAll(streamIdsFromStreamIdBaseExpression(id));
-        result.putAll(streamIdsFromResolvablePlaceholders(id));
-        return result;
-    }
-
-    @SuppressWarnings("unchecked")
-    private <T extends Expression<?>> Map<Expression<Object>, StreamId<Object>> streamIdsFromStreamIdBaseExpression(
-            DetailedExpressionStreamId<?, T> id) {
-        Collection<Node> leaves = Trees.findBottomNodes(id.expression());
-
-        return leaves.stream().filter(node -> node instanceof StreamIdBasedExpression)
-                .map(node -> (StreamIdBasedExpression<Object>) node)
-                .collect(Collectors.toMap(exp -> exp, exp -> exp.streamId()));
-    }
-
+    /* package visibility for testing */
     @SuppressWarnings({ "unchecked", "rawtypes" })
-    private <T extends Expression<?>> Map<Expression<Object>, StreamId<Object>> streamIdsFromResolvablePlaceholders(
+    @VisibleForTesting
+    <T extends Expression<?>> Map<Expression<Object>, StreamId<Object>> streamIdsFrom(
             DetailedExpressionStreamId<?, T> id) {
+        Expression<?> rootExpression = id.expression();
+        ResolvingContext initialCtx = id.initialCtx();
 
-        ResolvingContext resolvedContextForResolvableExpressions = id.initialCtx();
+        Collection<UnresolvedStreamIdBasedExpression> unresolvedStreamIdExpressions = TensoricsTreeSupport
+                .getNodesOfClass(rootExpression, UnresolvedStreamIdBasedExpression.class);
 
-        List<ResolvablePlaceholder> resolvableExpressions = TensoricsTreeSupport.getNodesOfClass(id.expression(),
-                ResolvablePlaceholder.class);
-
-        return resolvableExpressions.stream().map(node -> (ResolvablePlaceholder<StreamId<Object>>) node).collect(
-                toMap(resolvableExpression -> (Expression<Object>) resolvableExpression, resolvableExpression -> {
-                    return resolvedContextForResolvableExpressions
-                            .resolvedValueOf(resolvableExpression.resolvableExpression());
-                }));
+        Builder<Expression<Object>, StreamId<Object>> mapBuilder = ImmutableMap.builder();
+        for (UnresolvedStreamIdBasedExpression<Object> unresolvedStreamIdExpression : unresolvedStreamIdExpressions) {
+            try {
+                Expression<StreamId<Object>> streamIdExpression = unresolvedStreamIdExpression.streamIdExpression();
+                StreamId<Object> streamId = engine.resolve(streamIdExpression, initialCtx);
+                mapBuilder.put(unresolvedStreamIdExpression, streamId);
+            } catch (ResolvedContextDidNotGrowException ex) {
+                throw new RuntimeException(format(
+                        "Context did not grow while resolving the StreamId of expression. "
+                                + "This is most probably because the initial context (%s) did not contain the value of the current UnresolvedStreamIdBasedExpression (%s).",
+                        initialCtx, unresolvedStreamIdExpression), ex);
+            }
+        }
+        return mapBuilder.build();
     }
 
     private static final Observable<?> triggerObservable(Map<StreamId<?>, ? extends Observable<?>> observables,
@@ -144,7 +143,7 @@ public class DetailedTensoricsExpressionStreamFactory implements StreamFactory {
         }
         if (strategy instanceof BufferedEvaluation) {
             List<? extends Observable<?>> triggeringObservables = observables.entrySet().stream()
-                    .filter(e -> (e.getKey() instanceof OverlapBufferStreamId)).map(Entry::getValue).collect(toList());
+                    .filter(e -> e.getKey() instanceof OverlapBufferStreamId).map(Entry::getValue).collect(toList());
             if (triggeringObservables.isEmpty()) {
                 throw new NoBufferedStreamSpecifiedException();
             }

@@ -6,11 +6,7 @@ package cern.streaming.pool.ext.tensorics.expression;
 
 import static java.util.Objects.requireNonNull;
 
-import java.util.Collections;
-import java.util.List;
-
-import org.tensorics.core.tree.domain.AbstractDeferredExpression;
-import org.tensorics.core.tree.domain.Node;
+import org.tensorics.core.tree.domain.ResolvedExpression;
 
 import cern.streaming.pool.core.service.StreamId;
 
@@ -22,12 +18,12 @@ import cern.streaming.pool.core.service.StreamId;
  * @param <R> the return type of the expression (and thus the type of the values that the discovered stream will have to
  *            produce)
  */
-public class StreamIdBasedExpression<R> extends AbstractDeferredExpression<R> {
+public class StreamIdBasedExpression<R> extends UnresolvedStreamIdBasedExpression<R> {
 
     private final StreamId<R> streamId;
 
     protected StreamIdBasedExpression(StreamId<R> streamId) {
-        super();
+        super(ResolvedExpression.of(streamId));
         this.streamId = requireNonNull(streamId, "streamId must not be null.");
     }
 
@@ -36,15 +32,10 @@ public class StreamIdBasedExpression<R> extends AbstractDeferredExpression<R> {
     }
 
     @Override
-    public List<Node> getChildren() {
-        return Collections.emptyList();
-    }
-
-    @Override
     public int hashCode() {
         final int prime = 31;
         int result = 1;
-        result = prime * result + ((streamId == null) ? 0 : streamId.hashCode());
+        result = prime * result + ((streamId() == null) ? 0 : streamId().hashCode());
         return result;
     }
 
@@ -60,23 +51,23 @@ public class StreamIdBasedExpression<R> extends AbstractDeferredExpression<R> {
             return false;
         }
         StreamIdBasedExpression<?> other = (StreamIdBasedExpression<?>) obj;
-        if (streamId == null) {
-            if (other.streamId != null) {
+        if (streamId() == null) {
+            if (other.streamId() != null) {
                 return false;
             }
-        } else if (!streamId.equals(other.streamId)) {
+        } else if (!streamId().equals(other.streamId())) {
             return false;
         }
         return true;
     }
 
-    public StreamId<R> streamId() {
-        return streamId;
-    }
-
     @Override
     public String toString() {
-        return "StreamIdBasedExpression [streamId=" + streamId + "]";
+        return "StreamIdBasedExpression [streamId=" + streamId() + "]";
+    }
+
+    public StreamId<R> streamId() {
+        return streamId;
     }
 
 }

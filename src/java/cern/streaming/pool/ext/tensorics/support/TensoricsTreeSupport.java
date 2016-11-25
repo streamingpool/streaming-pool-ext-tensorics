@@ -5,6 +5,7 @@
 package cern.streaming.pool.ext.tensorics.support;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 import org.tensorics.core.tree.domain.Expression;
@@ -19,13 +20,12 @@ import org.tensorics.core.tree.walking.Trees;
  */
 public class TensoricsTreeSupport {
 
-    public static <C, T extends Expression<?>> List<C> getNodesOfClass(T rootExpression, Class<C> classToFind) {
+    public static <C, T extends Expression<?>> Collection<C> getNodesOfClass(T rootExpression, Class<C> classToFind) {
         List<C> nodesToReturn = new ArrayList<>();
         Trees.walkParentAfterChildren(rootExpression, new EveryNodeCallback() {
             @Override
             public void onEvery(Node node) {
                 if (classToFind.isAssignableFrom(node.getClass())) {
-                    // if ( node.getClass().isInstance(classToFind)) {
                     nodesToReturn.add(classToFind.cast(node));
                 }
             }

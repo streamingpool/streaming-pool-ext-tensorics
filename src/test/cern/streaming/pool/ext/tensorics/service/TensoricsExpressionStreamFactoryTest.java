@@ -7,6 +7,7 @@ package cern.streaming.pool.ext.tensorics.service;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
@@ -27,11 +28,9 @@ import cern.streaming.pool.core.service.ReactiveStream;
 import cern.streaming.pool.core.service.StreamId;
 import cern.streaming.pool.core.service.util.ReactiveStreams;
 import cern.streaming.pool.core.testing.NamedStreamId;
-import cern.streaming.pool.ext.tensorics.evaluation.EvaluationStrategies;
 import cern.streaming.pool.ext.tensorics.expression.StreamIdBasedExpression;
 import cern.streaming.pool.ext.tensorics.streamfactory.DetailedTensoricsExpressionStreamFactory;
 import cern.streaming.pool.ext.tensorics.streamfactory.TensoricsExpressionStreamFactory;
-import cern.streaming.pool.ext.tensorics.streamid.BufferedStreamId;
 import cern.streaming.pool.ext.tensorics.streamid.DetailedExpressionStreamId;
 import rx.Observable;
 
@@ -43,6 +42,7 @@ import rx.Observable;
 @RunWith(MockitoJUnitRunner.class)
 public class TensoricsExpressionStreamFactoryTest {
 
+    private static final StreamId<?> NO_TENSORICS_STREAM_ID = mock(StreamId.class);
     private static final StreamId<Double> ID_A = NamedStreamId.ofName("a");
     private static final StreamId<Double> ID_B = NamedStreamId.ofName("b");
 
@@ -51,11 +51,7 @@ public class TensoricsExpressionStreamFactoryTest {
 
     private static final Expression<Double> A_PLUS_B = mockExpression();
 
-    @Mock
     private DetailedExpressionStreamId<Double, Expression<Double>> expressionBasedStreamId;
-
-    @Mock
-    private BufferedStreamId<Integer> invalidStreamId;
 
     @Mock
     private DiscoveryService discoveryService;
@@ -65,8 +61,7 @@ public class TensoricsExpressionStreamFactoryTest {
     @Before
     public void setUp() {
         factoryUnderTest = new DetailedTensoricsExpressionStreamFactory(ResolvingEngines.defaultEngine());
-        when(expressionBasedStreamId.expression()).thenReturn(A_PLUS_B);
-        when(expressionBasedStreamId.evaluationStrategy()).thenReturn(EvaluationStrategies.defaultEvaluation());
+        expressionBasedStreamId = DetailedExpressionStreamId.of(A_PLUS_B);
 
         mockStream1();
         mockStream2();
@@ -102,7 +97,7 @@ public class TensoricsExpressionStreamFactoryTest {
 
     @Test
     public void testCanCreateWithWrongStreamIdType() {
-        assertFalse(factoryUnderTest.create(invalidStreamId, discoveryService).isPresent());
+        assertFalse(factoryUnderTest.create(NO_TENSORICS_STREAM_ID, discoveryService).isPresent());
     }
 
     @Test
