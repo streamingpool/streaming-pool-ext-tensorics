@@ -33,12 +33,12 @@ import cern.streaming.pool.core.conf.StreamCreatorFactoryConfiguration;
 import cern.streaming.pool.core.service.StreamId;
 import cern.streaming.pool.core.support.AbstractStreamSupport;
 import cern.streaming.pool.core.support.RxStreamSupport;
-import cern.streaming.pool.ext.tensorics.conf.TensoricsStreamingConfiguration;
+import cern.streaming.pool.ext.tensorics.conf.TestTensoricsEngineConfiguration;
 import rx.observers.TestSubscriber;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(classes = { EmbeddedPoolConfiguration.class, StreamCreatorFactoryConfiguration.class,
-        TensoricsStreamingConfiguration.class })
+        TestTensoricsEngineConfiguration.class })
 public class DetailedTensoricsExpressionStreamFactoryInitialContextTest extends AbstractStreamSupport
         implements RxStreamSupport {
 
