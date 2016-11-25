@@ -22,7 +22,7 @@ public class StreamIdBasedExpression<R> extends UnresolvedStreamIdBasedExpressio
 
     private final StreamId<R> streamId;
 
-    private StreamIdBasedExpression(StreamId<R> streamId) {
+    protected StreamIdBasedExpression(StreamId<R> streamId) {
         super(ResolvedExpression.of(streamId));
         this.streamId = requireNonNull(streamId, "streamId must not be null.");
     }
@@ -35,7 +35,7 @@ public class StreamIdBasedExpression<R> extends UnresolvedStreamIdBasedExpressio
     public int hashCode() {
         final int prime = 31;
         int result = 1;
-        result = prime * result + ((streamId == null) ? 0 : streamId.hashCode());
+        result = prime * result + ((streamId() == null) ? 0 : streamId().hashCode());
         return result;
     }
 
@@ -51,11 +51,11 @@ public class StreamIdBasedExpression<R> extends UnresolvedStreamIdBasedExpressio
             return false;
         }
         StreamIdBasedExpression<?> other = (StreamIdBasedExpression<?>) obj;
-        if (streamId == null) {
-            if (other.streamId != null) {
+        if (streamId() == null) {
+            if (other.streamId() != null) {
                 return false;
             }
-        } else if (!streamId.equals(other.streamId)) {
+        } else if (!streamId().equals(other.streamId())) {
             return false;
         }
         return true;
@@ -63,7 +63,11 @@ public class StreamIdBasedExpression<R> extends UnresolvedStreamIdBasedExpressio
 
     @Override
     public String toString() {
-        return "StreamIdBasedExpression [streamId=" + streamId + "]";
+        return "StreamIdBasedExpression [streamId=" + streamId() + "]";
+    }
+
+    public StreamId<R> streamId() {
+        return streamId;
     }
 
 }
