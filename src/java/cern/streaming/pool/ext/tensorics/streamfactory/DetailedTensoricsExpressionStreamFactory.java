@@ -27,6 +27,7 @@ import org.tensorics.core.tree.domain.Contexts;
 import org.tensorics.core.tree.domain.EditableResolvingContext;
 import org.tensorics.core.tree.domain.Expression;
 import org.tensorics.core.tree.domain.ResolvingContext;
+import org.tensorics.core.tree.walking.Trees;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableMap;
@@ -45,7 +46,6 @@ import cern.streaming.pool.ext.tensorics.evaluation.TriggeredEvaluation;
 import cern.streaming.pool.ext.tensorics.exception.NoBufferedStreamSpecifiedException;
 import cern.streaming.pool.ext.tensorics.expression.UnresolvedStreamIdBasedExpression;
 import cern.streaming.pool.ext.tensorics.streamid.DetailedExpressionStreamId;
-import cern.streaming.pool.ext.tensorics.support.TensoricsTreeSupport;
 import rx.Observable;
 import rx.functions.FuncN;
 
@@ -117,8 +117,8 @@ public class DetailedTensoricsExpressionStreamFactory implements StreamFactory {
         Expression<?> rootExpression = id.expression();
         ResolvingContext initialCtx = id.initialCtx();
 
-        Collection<UnresolvedStreamIdBasedExpression> unresolvedStreamIdExpressions = TensoricsTreeSupport
-                .getNodesOfClass(rootExpression, UnresolvedStreamIdBasedExpression.class);
+        Collection<UnresolvedStreamIdBasedExpression> unresolvedStreamIdExpressions = Trees
+                .findNodesOfClass(rootExpression, UnresolvedStreamIdBasedExpression.class);
 
         Builder<Expression<Object>, StreamId<Object>> mapBuilder = ImmutableMap.builder();
         for (UnresolvedStreamIdBasedExpression<Object> unresolvedStreamIdExpression : unresolvedStreamIdExpressions) {
