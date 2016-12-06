@@ -13,7 +13,7 @@
 
 			<dep product="streaming-pool-core" version="DEV" />
 			<dep product="tensorics-core-pro" version="PRO" />
-			<dep product="tensorics-expression" version="DEV" />
+			<dep product="tensorics-expression-pro" version="PRO" />
 
 			<dep product="junit" version="4.12" local="true" excluded="true" />
 			<dep product="assertj-core" version="1.6.0" local="true" excluded="true" />
