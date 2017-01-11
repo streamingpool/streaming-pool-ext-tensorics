@@ -9,10 +9,11 @@ import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static java.util.function.Function.identity;
 import static org.assertj.core.api.Assertions.assertThat;
-import static rx.Observable.interval;
-import static rx.Observable.just;
-import static rx.Observable.merge;
-import static rx.Observable.never;
+import static org.assertj.core.api.Assertions.fail;
+import static io.reactivex.Flowable.interval;
+import static io.reactivex.Flowable.just;
+import static io.reactivex.Flowable.merge;
+import static io.reactivex.Flowable.never;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -28,8 +29,8 @@ import cern.streaming.pool.core.service.streamid.OverlapBufferStreamId;
 import cern.streaming.pool.core.service.streamid.BufferSpecification.EndStreamMatcher;
 import cern.streaming.pool.core.support.RxStreamSupport;
 import cern.streaming.pool.core.testing.AbstractStreamTest;
-import cern.streaming.pool.core.testing.subscriber.BlockingTestSubscriber;
-import rx.Observable;
+import io.reactivex.Flowable;
+import io.reactivex.subscribers.TestSubscriber;
 
 public class TensorConverterStreamIdTest extends AbstractStreamTest implements RxStreamSupport {
 
@@ -60,16 +61,16 @@ public class TensorConverterStreamIdTest extends AbstractStreamTest implements R
 
     @Test
     public void integrationWithOverlappingBufferStreamId() {
-        Observable<Long> sourceStream = interval(1, SECONDS).take(6);
-        Observable<String> startStream = merge(just("FLAG").delay(1500, MILLISECONDS), never());
-        Observable<String> endStream = startStream.delay(5, SECONDS);
+        Flowable<Long> sourceStream = interval(1, SECONDS).take(6);
+        Flowable<String> startStream = merge(just("FLAG").delay(1500, MILLISECONDS), never());
+        Flowable<String> endStream = startStream.delay(5, SECONDS);
 
         StreamId<Long> sourceId = provide(sourceStream).withUniqueStreamId();
         StreamId<String> startId = provide(startStream).withUniqueStreamId();
         StreamId<String> endId = provide(endStream).withUniqueStreamId();
 
-        OverlapBufferStreamId<Long> bufferId = OverlapBufferStreamId.of(sourceId, BufferSpecification
-                .ofStartEnd(startId, Collections.singleton(EndStreamMatcher.endingOnEvery(endId))));
+        OverlapBufferStreamId<Long> bufferId = OverlapBufferStreamId.of(sourceId,
+                BufferSpecification.ofStartEnd(startId, Collections.singleton(EndStreamMatcher.endingOnEvery(endId))));
         TensorConverterStreamId<Long, Long> tensorId = TensorConverterStreamId.of(bufferId, Position::of, identity());
 
         List<Tensor<Long>> values = valuesOf(tensorId);
@@ -79,10 +80,14 @@ public class TensorConverterStreamIdTest extends AbstractStreamTest implements R
     }
 
     private <T> List<T> valuesOf(StreamId<T> streamId) {
-        BlockingTestSubscriber<T> subscriber = BlockingTestSubscriber.ofName("Subscriber");
-        publisherFrom(streamId).subscribe(subscriber);
-        subscriber.await();
-        return subscriber.getValues();
+        TestSubscriber<T> subscriber = TestSubscriber.create();
+        rxFrom(streamId).subscribe(subscriber);
+        try {
+            subscriber.await();
+        } catch (InterruptedException e) {
+            fail("Interrupted while waiting", e);
+        }
+        return subscriber.values();
     }
 
 }

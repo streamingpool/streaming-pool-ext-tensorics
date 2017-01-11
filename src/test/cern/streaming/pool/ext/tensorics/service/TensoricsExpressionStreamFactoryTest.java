@@ -17,15 +17,14 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
+import org.reactivestreams.Publisher;
 import org.tensorics.core.lang.DoubleScript;
 import org.tensorics.core.resolve.domain.DetailedExpressionResult;
 import org.tensorics.core.resolve.engine.ResolvingEngines;
 import org.tensorics.core.tree.domain.Expression;
 
 import cern.streaming.pool.core.service.DiscoveryService;
-import cern.streaming.pool.core.service.ReactiveStream;
 import cern.streaming.pool.core.service.StreamId;
-import cern.streaming.pool.core.service.util.ReactiveStreams;
 import cern.streaming.pool.core.testing.NamedStreamId;
 import cern.streaming.pool.ext.tensorics.evaluation.EvaluationStrategies;
 import cern.streaming.pool.ext.tensorics.expression.StreamIdBasedExpression;
@@ -33,7 +32,7 @@ import cern.streaming.pool.ext.tensorics.streamfactory.DetailedTensoricsExpressi
 import cern.streaming.pool.ext.tensorics.streamfactory.TensoricsExpressionStreamFactory;
 import cern.streaming.pool.ext.tensorics.streamid.BufferedStreamId;
 import cern.streaming.pool.ext.tensorics.streamid.DetailedExpressionStreamId;
-import rx.Observable;
+import io.reactivex.Flowable;
 
 /**
  * Unit tests for {@link TensoricsExpressionStreamFactory}
@@ -73,24 +72,22 @@ public class TensoricsExpressionStreamFactoryTest {
     }
 
     private void mockStream1() {
-        Observable<Double> first = Observable.interval(100, TimeUnit.MILLISECONDS).map(i -> (i + 1) * 10D).limit(3);
-        ReactiveStream<Double> firstReact = ReactiveStreams.fromRx(first);
-        when(discoveryService.discover(ID_A)).thenReturn(firstReact);
+        Flowable<Double> first = Flowable.interval(100, TimeUnit.MILLISECONDS).map(i -> (i + 1) * 10D).take(3);
+        when(discoveryService.discover(ID_A)).thenReturn(first);
     }
 
     private void mockStream2() {
-        Observable<Double> second = Observable.interval(77, TimeUnit.MILLISECONDS).map(i -> 2.0).limit(3);
-        ReactiveStream<Double> secondReact = ReactiveStreams.fromRx(second);
-        when(discoveryService.discover(ID_B)).thenReturn(secondReact);
+        Flowable<Double> second = Flowable.interval(77, TimeUnit.MILLISECONDS).map(i -> 2.0).take(3);
+        when(discoveryService.discover(ID_B)).thenReturn(second);
     }
 
     @Test
     public void testCreate() {
-        ReactiveStream<DetailedExpressionResult<Double, Expression<Double>>> resolvedExpression = factoryUnderTest
+        Publisher<DetailedExpressionResult<Double, Expression<Double>>> resolvedExpression = factoryUnderTest
                 .create(expressionBasedStreamId, discoveryService).get();
 
-        List<Double> values = ReactiveStreams.rxFrom(resolvedExpression).map(DetailedExpressionResult::value).toList()
-                .toBlocking().single();
+        List<Double> values = Flowable.fromPublisher(resolvedExpression).map(DetailedExpressionResult::value).toList()
+                .blockingGet();
 
         assertEquals(5, values.size());
     }

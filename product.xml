@@ -3,9 +3,8 @@
 	<product name="streaming-pool-ext-tensorics" version="0.0.1" directory="org/streaming-pool/streaming-pool-ext-tensorics">
 		<jar>streaming-pool-ext-tensorics.jar</jar>
 		<dependencies>
-			<dep product="log4j" />
 			<dep product="slf4j-api" />
-			<dep product="slf4j-log4j12" />
+			<dep product="log4j" local="true" excluded="true" />
 
 			<dep product="spring-core" version="PRO" />
 			<dep product="spring-context" version="PRO" />
@@ -18,7 +17,6 @@
 			<dep product="assertj-core" version="1.6.0" local="true" excluded="true" />
 			<dep product="mockito-core" version="DEV" local="true" />
 			<dep product="commons-lang3" local="true" excluded="true"/>
-			
 		</dependencies>
 	</product>
 </products>
