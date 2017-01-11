@@ -20,17 +20,16 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
+import org.reactivestreams.Publisher;
 import org.tensorics.core.commons.operations.Conversion;
 import org.tensorics.core.function.DiscreteFunction;
 
 import cern.streaming.pool.core.service.DiscoveryService;
-import cern.streaming.pool.core.service.ReactiveStream;
-import cern.streaming.pool.core.service.util.ReactiveStreams;
 import cern.streaming.pool.core.testing.AbstractStreamTest;
 import cern.streaming.pool.ext.tensorics.streamfactory.DiscreteFunctionStreamFactory;
 import cern.streaming.pool.ext.tensorics.streamid.BufferedStreamId;
 import cern.streaming.pool.ext.tensorics.streamid.FunctionStreamId;
-import rx.Observable;
+import io.reactivex.Flowable;
 
 /**
  * Unit test sfor {@link DiscreteFunctionStreamFactory}
@@ -61,21 +60,21 @@ public class DiscreteFunctionStreamFactoryTest extends AbstractStreamTest {
 
     @Test
     public void testCreate() {
-        ReactiveStream<DiscreteFunction<Integer, Double>> reactStream = factoryUnderTest.create(functionStreamId,
-                discoveryService).get();
+        Publisher<DiscreteFunction<Integer, Double>> reactStream = factoryUnderTest
+                .create(functionStreamId, discoveryService).get();
 
         assertNotNull(reactStream);
 
-        Observable<DiscreteFunction<Integer, Double>> rxFrom = ReactiveStreams.rxFrom(reactStream);
+        Flowable<DiscreteFunction<Integer, Double>> rxFrom = Flowable.fromPublisher(reactStream);
 
-        List<DiscreteFunction<Integer, Double>> functions = rxFrom.toList().toBlocking().single();
+        List<DiscreteFunction<Integer, Double>> functions = rxFrom.toList().blockingGet();
 
         assertEquals(2, functions.size());
 
         assertTrue(functions.stream().allMatch(f -> f.definedXValues().size() == 2));
 
     }
-    
+
     @Test
     public void testCanCreateWithCorrectStreamIdType() {
         assertTrue(factoryUnderTest.create(functionStreamId, discoveryService).isPresent());
@@ -85,18 +84,18 @@ public class DiscreteFunctionStreamFactoryTest extends AbstractStreamTest {
     public void testCanCreateWithWrongStreamIdType() {
         assertFalse(factoryUnderTest.create(bufferedStreamId, discoveryService).isPresent());
     }
-    
+
     @Test
     public void testCanCreateWithNull() {
         assertFalse(factoryUnderTest.create(null, discoveryService).isPresent());
     }
-    
+
     private void mockDiscoveryService() {
         List<Pair<Integer, Double>> list1 = Arrays.asList(Pair.of(1, 1.0), Pair.of(2, 2.0));
         List<Pair<Integer, Double>> list2 = Arrays.asList(Pair.of(3, 3.0), Pair.of(4, 4.0));
 
-        Observable<List<Pair<Integer, Double>>> source = Observable.just(list1, list2);
-        ReactiveStream<List<Pair<Integer, Double>>> stream = ReactiveStreams.fromRx(source);
+        Flowable<List<Pair<Integer, Double>>> source = Flowable.just(list1, list2);
+        Publisher<List<Pair<Integer, Double>>> stream = Flowable.fromPublisher(source);
         when(discoveryService.discover(bufferedStreamId)).thenReturn(stream);
 
     }
