@@ -57,19 +57,19 @@ task configureSonatypeDeployment(type: DefaultTask) << {
 				}
 
 				pom.project {
-					name 'streamingpool-core'
+					name 'streamingpool-ext-tensorics'
 					packaging 'jar'
-					description 'This project is an high level abstraction over Reactive Streams libraries that is currently used inside CERN.'
+					description 'This project is a link between streamingpool-core and tensorics projects.'
 					url 'http://www.streamingpool.org'
 
 					groupId 'org.streamingpool'
-					artifactId 'streamingpool-core'
+					artifactId 'streamingpool-ext-tensorics'
 					version getVersion()
 
 					scm {
-						connection 'scm:git:https://github.com/streamingpool/streamingpool-core.git'
-						developerConnection 'scm:git:https://github.com/streamingpool/streamingpool-core.git'
-						url 'https://github.com/streamingpool/streamingpool-core.git'
+						connection 'scm:git:https://github.com/streamingpool/streamingpool-ext-tensorics.git'
+						developerConnection 'scm:git:https://github.com/streamingpool/streamingpool-ext-tensorics.git'
+						url 'https://github.com/streamingpool/streamingpool-ext-tensorics.git'
 					}
 
 					licenses {
