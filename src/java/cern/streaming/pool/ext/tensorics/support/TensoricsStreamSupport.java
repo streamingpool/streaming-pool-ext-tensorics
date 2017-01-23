@@ -4,14 +4,13 @@
 
 package cern.streaming.pool.ext.tensorics.support;
 
+import org.reactivestreams.Publisher;
 import org.tensorics.core.lang.TensoricScript;
 import org.tensorics.core.tree.domain.Expression;
 
-import cern.streaming.pool.core.service.ReactiveStream;
-import cern.streaming.pool.core.service.util.ReactiveStreams;
 import cern.streaming.pool.core.support.StreamSupport;
 import cern.streaming.pool.ext.tensorics.streamid.ExpressionBasedStreamId;
-import rx.Observable;
+import io.reactivex.Flowable;
 
 /**
  * Support interface for working with tensorics expressions and streams
@@ -20,19 +19,19 @@ import rx.Observable;
  */
 public interface TensoricsStreamSupport extends StreamSupport {
 
-    default <T> ReactiveStream<T> discover(Expression<T> expression) {
+    default <T> Publisher<T> discover(Expression<T> expression) {
         return discover(ExpressionBasedStreamId.of(expression));
     }
 
-    default <T> ReactiveStream<T> discover(TensoricScript<?, T> script) {
+    default <T> Publisher<T> discover(TensoricScript<?, T> script) {
         return discover(ExpressionBasedStreamId.of(script.getInternalExpression()));
     }
 
-    default <T> Observable<T> rxFrom(Expression<T> expression) {
-        return ReactiveStreams.rxFrom(discover(expression));
+    default <T> Flowable<T> rxFrom(Expression<T> expression) {
+        return Flowable.fromPublisher(discover(expression));
     }
 
-    default <T> Observable<T> rxFrom(TensoricScript<?, T> script) {
-        return ReactiveStreams.rxFrom(discover(script));
+    default <T> Flowable<T> rxFrom(TensoricScript<?, T> script) {
+        return Flowable.fromPublisher(discover(script));
     }
 }

@@ -30,7 +30,7 @@ import cern.streaming.pool.ext.tensorics.expression.StreamIdBasedExpression;
 import cern.streaming.pool.ext.tensorics.streamid.BufferedStreamId;
 import cern.streaming.pool.ext.tensorics.streamid.FunctionStreamId;
 import cern.streaming.pool.ext.tensorics.support.TensoricsStreamSupport;
-import rx.Observable;
+import io.reactivex.Flowable;
 
 /**
  * An example showing how tensorics expressions and the streaming pool framework are combined in order to perform
@@ -55,7 +55,7 @@ public class ContinuousSignalRMSExample extends AbstractStreamTest implements Rx
     public void setUp() {
         final long startTime = System.currentTimeMillis();
 
-        Observable<Pair<Instant, Double>> valuesWithTimeStamp1 = Observable.interval(1, TimeUnit.SECONDS)
+        Flowable<Pair<Instant, Double>> valuesWithTimeStamp1 = Flowable.interval(1, TimeUnit.SECONDS)
                 .map(d -> Pair.of(Instant.ofEpochMilli(startTime + d), d.doubleValue()));
 
         provide(valuesWithTimeStamp1).as(ID_VALUES);
