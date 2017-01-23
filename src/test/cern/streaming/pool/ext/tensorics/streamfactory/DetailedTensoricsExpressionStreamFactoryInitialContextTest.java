@@ -6,10 +6,10 @@ package cern.streaming.pool.ext.tensorics.streamfactory;
 
 import static cern.streaming.pool.ext.tensorics.evaluation.TriggeredEvaluation.triggeredBy;
 import static cern.streaming.pool.ext.tensorics.streamid.DetailedExpressionStreamId.of;
+import static io.reactivex.Flowable.just;
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
-import static rx.Observable.just;
 
 import java.util.Collections;
 import java.util.List;
@@ -34,7 +34,7 @@ import cern.streaming.pool.core.service.StreamId;
 import cern.streaming.pool.core.support.AbstractStreamSupport;
 import cern.streaming.pool.core.support.RxStreamSupport;
 import cern.streaming.pool.ext.tensorics.conf.TestTensoricsEngineConfiguration;
-import rx.observers.TestSubscriber;
+import io.reactivex.subscribers.TestSubscriber;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(classes = { EmbeddedPoolConfiguration.class, StreamCreatorFactoryConfiguration.class,
@@ -53,8 +53,8 @@ public class DetailedTensoricsExpressionStreamFactoryInitialContextTest extends 
         rxFrom(of(expression, triggeredBy(triggerStreamId))).subscribe(subscriber);
         subscriber.awaitTerminalEvent();
 
-        assertThat(subscriber.getOnErrorEvents()).hasSize(1);
-        assertThat(subscriber.getOnErrorEvents().get(0)).isInstanceOf(ResolvedContextDidNotGrowException.class);
+        assertThat(subscriber.errors()).hasSize(1);
+        assertThat(subscriber.errors().get(0)).isInstanceOf(ResolvedContextDidNotGrowException.class);
     }
 
     @Test
