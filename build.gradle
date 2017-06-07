@@ -50,7 +50,7 @@ sourceCompatibility = 1.8
 dependencies {
   compile 'org.streamingpool:streamingpool-core:1.1.2'
 
-  compile 'org.tensorics:tensorics-core:0.0.28'
+  compile 'org.tensorics:tensorics-core:0.0.35'
   compile 'org.tensorics:tensorics-expression:0.0.2'
 
   compile 'org.springframework:spring-core:4.3.5.RELEASE'
