@@ -36,6 +36,7 @@ import java.util.Map.Entry;
 import java.util.Optional;
 
 import org.reactivestreams.Publisher;
+import org.streamingpool.core.domain.ErrorStreamPair;
 import org.streamingpool.core.service.DiscoveryService;
 import org.streamingpool.core.service.StreamFactory;
 import org.streamingpool.core.service.StreamId;
@@ -95,11 +96,12 @@ public class DetailedTensoricsExpressionStreamFactory implements StreamFactory {
 
     @SuppressWarnings("unchecked")
     @Override
-    public <T> Optional<Publisher<T>> create(StreamId<T> id, DiscoveryService discoveryService) {
+    public <T> ErrorStreamPair<T> create(StreamId<T> id, DiscoveryService discoveryService) {
         if (!(id instanceof DetailedExpressionStreamId)) {
-            return Optional.empty();
+            return ErrorStreamPair.empty();
         }
-        return of((Flowable<T>) resolvedStream((DetailedExpressionStreamId<?, ?>) id, discoveryService));
+        return ErrorStreamPair
+                .ofData((Flowable<T>) resolvedStream((DetailedExpressionStreamId<?, ?>) id, discoveryService));
     }
 
     private <T, E extends Expression<T>> Flowable<DetailedExpressionResult<T, E>> resolvedStream(

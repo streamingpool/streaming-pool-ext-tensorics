@@ -97,7 +97,7 @@ public class TensoricsExpressionStreamFactoryTest {
     @Test
     public void testCreate() {
         Publisher<DetailedExpressionResult<Double, Expression<Double>>> resolvedExpression = factoryUnderTest
-                .create(expressionBasedStreamId, discoveryService).get();
+                .create(expressionBasedStreamId, discoveryService).data();
 
         List<Double> values = Flowable.fromPublisher(resolvedExpression).map(DetailedExpressionResult::value).toList()
                 .blockingGet();

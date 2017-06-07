@@ -30,6 +30,7 @@ import java.time.Duration;
 import java.util.Optional;
 
 import org.reactivestreams.Publisher;
+import org.streamingpool.core.domain.ErrorStreamPair;
 import org.streamingpool.core.service.DiscoveryService;
 import org.streamingpool.core.service.StreamFactory;
 import org.streamingpool.core.service.StreamId;
@@ -46,16 +47,17 @@ public class TensoricsBufferedStreamFactory implements StreamFactory {
     /* Safe, manually checked */
     @SuppressWarnings("unchecked")
     @Override
-    public <T> Optional<Publisher<T>> create(StreamId<T> id, DiscoveryService discoveryService) {
+    public <T> ErrorStreamPair<T> create(StreamId<T> id, DiscoveryService discoveryService) {
         if (!(id instanceof BufferedStreamId)) {
-            return Optional.empty();
+            return ErrorStreamPair.empty();
         }
         BufferedStreamId<T> bufferedId = (BufferedStreamId<T>) id;
 
         Publisher<T> sourceStream = discoveryService.discover(bufferedId.getSourceStream());
         Duration windowLength = bufferedId.getWindowLength();
 
-        return of((Publisher<T>) fromPublisher(sourceStream).buffer(windowLength.toNanos(), NANOSECONDS));
+        return ErrorStreamPair
+                .ofData((Publisher<T>) fromPublisher(sourceStream).buffer(windowLength.toNanos(), NANOSECONDS));
     }
 
 }

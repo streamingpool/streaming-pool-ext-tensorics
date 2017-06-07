@@ -25,6 +25,7 @@ package org.streamingpool.ext.tensorics.streamid;
 import static org.tensorics.core.tensor.stream.TensorStreams.toTensor;
 
 import java.util.Collection;
+import java.util.Set;
 import java.util.function.Function;
 
 import org.streamingpool.core.service.StreamId;
@@ -35,15 +36,15 @@ import org.tensorics.core.tensor.Tensor;
 public class TensorConverterStreamId<T, U> extends DerivedStreamId<Collection<T>, Tensor<U>> {
 
     public static <T, U, C extends Collection<T>> TensorConverterStreamId<T, U> of(StreamId<C> sourceStreamId,
-            Function<T, Position> positionMapper, Function<T, U> valueMapper) {
+            Function<T, Position> positionMapper, Function<T, U> valueMapper, Set<Class<?>> dimensions) {
         @SuppressWarnings("unchecked") /* Enforced by method signature */
         TensorConverterStreamId<T, U> streamId = new TensorConverterStreamId<>((StreamId<Collection<T>>) sourceStreamId,
-                positionMapper, valueMapper);
+                positionMapper, valueMapper, dimensions);
         return streamId;
     }
 
     private TensorConverterStreamId(StreamId<Collection<T>> sourceStreamId, Function<T, Position> positionExtractor,
-            Function<T, U> valueMapper) {
-        super(sourceStreamId, values -> values.stream().collect(toTensor(positionExtractor, valueMapper)));
+            Function<T, U> valueMapper, Set<Class<?>> dimensions) {
+        super(sourceStreamId, values -> values.stream().collect(toTensor(positionExtractor, valueMapper, dimensions)));
     }
 }

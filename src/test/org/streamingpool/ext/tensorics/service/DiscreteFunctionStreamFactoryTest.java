@@ -79,7 +79,7 @@ public class DiscreteFunctionStreamFactoryTest extends AbstractStreamTest {
     @Test
     public void testCreate() {
         Publisher<DiscreteFunction<Integer, Double>> reactStream = factoryUnderTest
-                .create(functionStreamId, discoveryService).get();
+                .create(functionStreamId, discoveryService).data();
 
         assertNotNull(reactStream);
 

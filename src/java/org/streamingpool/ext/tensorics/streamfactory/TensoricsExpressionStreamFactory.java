@@ -27,6 +27,7 @@ import static io.reactivex.Flowable.fromPublisher;
 import java.util.Optional;
 
 import org.reactivestreams.Publisher;
+import org.streamingpool.core.domain.ErrorStreamPair;
 import org.streamingpool.core.service.DiscoveryService;
 import org.streamingpool.core.service.StreamFactory;
 import org.streamingpool.core.service.StreamId;
@@ -40,13 +41,14 @@ import org.tensorics.core.resolve.domain.DetailedExpressionResult;
 public class TensoricsExpressionStreamFactory implements StreamFactory {
 
     @Override
-    public <Y> Optional<Publisher<Y>> create(StreamId<Y> id, DiscoveryService discoveryService) {
-        if(!(id instanceof ExpressionBasedStreamId)) {
-            return Optional.empty();
+    public <Y> ErrorStreamPair<Y> create(StreamId<Y> id, DiscoveryService discoveryService) {
+        if (!(id instanceof ExpressionBasedStreamId)) {
+            return ErrorStreamPair.empty();
         }
         ExpressionBasedStreamId<Y> expressionBasedId = (ExpressionBasedStreamId<Y>) id;
         DetailedExpressionStreamId<Y, ?> expression = expressionBasedId.getDetailedId();
-        return Optional.of(fromPublisher(discoveryService.discover(expression)).map(DetailedExpressionResult::value));
+        return ErrorStreamPair
+                .ofData(fromPublisher(discoveryService.discover(expression)).map(DetailedExpressionResult::value));
     }
 
 }

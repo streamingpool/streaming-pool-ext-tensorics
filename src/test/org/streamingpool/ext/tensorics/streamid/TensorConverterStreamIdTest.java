@@ -60,7 +60,7 @@ public class TensorConverterStreamIdTest extends AbstractStreamTest implements R
         StreamId<List<Integer>> dataStreamId = provide(just(data)).withUniqueStreamId();
 
         TensorConverterStreamId<Integer, Integer> tensorConverterStreamId = TensorConverterStreamId.of(dataStreamId,
-                v -> Position.of(v), identity());
+                v -> Position.of(v), identity(), Collections.singleton(Integer.class));
 
         List<Tensor<Integer>> values = valuesOf(tensorConverterStreamId);
 
@@ -75,7 +75,9 @@ public class TensorConverterStreamIdTest extends AbstractStreamTest implements R
         StreamId<List<Integer>> dummyStreamId = new StreamId<List<Integer>>() {
             /**/};
 
-        TensorConverterStreamId.of(dummyStreamId, v -> invalidPositions.get(v), identity()).conversion().apply(data);
+        TensorConverterStreamId
+                .of(dummyStreamId, v -> invalidPositions.get(v), identity(), Collections.singleton(Integer.class))
+                .conversion().apply(data);
     }
 
     @Test
@@ -90,7 +92,8 @@ public class TensorConverterStreamIdTest extends AbstractStreamTest implements R
 
         OverlapBufferStreamId<Long> bufferId = OverlapBufferStreamId.of(sourceId,
                 BufferSpecification.ofStartEnd(startId, Collections.singleton(EndStreamMatcher.endingOnEvery(endId))));
-        TensorConverterStreamId<Long, Long> tensorId = TensorConverterStreamId.of(bufferId, Position::of, identity());
+        TensorConverterStreamId<Long, Long> tensorId = TensorConverterStreamId.of(bufferId, Position::of, identity(),
+                Collections.singleton(Long.class));
 
         List<Tensor<Long>> values = valuesOf(tensorId);
 

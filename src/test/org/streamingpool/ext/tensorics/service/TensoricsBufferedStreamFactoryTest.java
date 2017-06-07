@@ -79,7 +79,7 @@ public class TensoricsBufferedStreamFactoryTest {
 
     @Test
     public void testCreate() {
-        Publisher<List<Integer>> createdStream = factoryUnderTest.create(bufferedStreamId, discoveryService).get();
+        Publisher<List<Integer>> createdStream = factoryUnderTest.create(bufferedStreamId, discoveryService).data();
 
         verify(bufferedStreamId).getSourceStream();
         verify(bufferedStreamId).getWindowLength();

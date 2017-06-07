@@ -28,6 +28,7 @@ import java.util.List;
 import java.util.Optional;
 
 import org.reactivestreams.Publisher;
+import org.streamingpool.core.domain.ErrorStreamPair;
 import org.streamingpool.core.service.DiscoveryService;
 import org.streamingpool.core.service.StreamFactory;
 import org.streamingpool.core.service.StreamId;
@@ -50,14 +51,14 @@ public class DiscreteFunctionStreamFactory implements StreamFactory {
     /* Safe, manually checked */
     @SuppressWarnings("unchecked")
     @Override
-    public <T> Optional<Publisher<T>> create(StreamId<T> id, DiscoveryService discoveryService) {
+    public <T> ErrorStreamPair<T> create(StreamId<T> id, DiscoveryService discoveryService) {
         if (!(id instanceof FunctionStreamId)) {
-            return Optional.empty();
+            return ErrorStreamPair.empty();
         }
 
         FunctionStreamId<?, ?, ?> functionId = (FunctionStreamId<?, ?, ?>) id;
 
-        return of((Publisher<T>) createFunctionStream(functionId, discoveryService));
+        return ErrorStreamPair.ofData((Publisher<T>) createFunctionStream(functionId, discoveryService));
     }
 
     <R, X, Y> Publisher<DiscreteFunction<X, Y>> createFunctionStream(FunctionStreamId<R, X, Y> id,
