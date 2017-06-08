@@ -3,6 +3,8 @@ buildscript {
         if (System.getenv('BUILD_SERVER') || System.getProperty('CERN_TECHNET_VM')) {
             maven {
                 url 'http://artifactory.cern.ch/repo'
+            }
+            maven {
                 url 'http://artifactory.cern.ch/jcenter'
             }
         } else {
@@ -18,15 +20,17 @@ buildscript {
 }
 
 repositories {
- if (System.getenv('BUILD_SERVER') || System.getProperty('CERN_TECHNET_VM')) {
-            maven {
-                url 'http://artifactory.cern.ch/repo'
-                url 'http://artifactory.cern.ch/jcenter'
-            }
-        } else {
-            mavenCentral()
-            jcenter()
+    if (System.getenv('BUILD_SERVER') || System.getProperty('CERN_TECHNET_VM')) {
+        maven {
+            url 'http://artifactory.cern.ch/repo'
         }
+        maven {
+            url 'http://artifactory.cern.ch/jcenter'
+        }
+    } else {
+        mavenCentral()
+        jcenter()
+    }
 }
 
 apply plugin: 'java'
