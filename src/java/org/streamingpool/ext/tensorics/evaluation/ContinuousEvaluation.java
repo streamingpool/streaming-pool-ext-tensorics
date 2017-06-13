@@ -41,11 +41,11 @@ public class ContinuousEvaluation implements EvaluationStrategy {
     /**
      * @return an instance of the continuous evaluation strategy
      */
-    public static final ContinuousEvaluation instance() {
+    public static ContinuousEvaluation instance() {
         return INSTANCE;
     }
 
-    public static final Builder builder() {
+    public static Builder builder() {
         return new Builder();
     }
 

@@ -60,7 +60,7 @@ public class TensorConverterStreamIdTest extends AbstractStreamTest implements R
         StreamId<List<Integer>> dataStreamId = provide(just(data)).withUniqueStreamId();
 
         TensorConverterStreamId<Integer, Integer> tensorConverterStreamId = TensorConverterStreamId.of(dataStreamId,
-                v -> Position.of(v), identity(), Collections.singleton(Integer.class));
+                Position::of, identity(), Collections.singleton(Integer.class));
 
         List<Tensor<Integer>> values = valuesOf(tensorConverterStreamId);
 
@@ -76,7 +76,7 @@ public class TensorConverterStreamIdTest extends AbstractStreamTest implements R
             /**/};
 
         TensorConverterStreamId
-                .of(dummyStreamId, v -> invalidPositions.get(v), identity(), Collections.singleton(Integer.class))
+                .of(dummyStreamId, invalidPositions::get, identity(), Collections.singleton(Integer.class))
                 .conversion().apply(data);
     }
 

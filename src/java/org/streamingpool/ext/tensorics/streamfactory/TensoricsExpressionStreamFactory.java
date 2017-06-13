@@ -24,9 +24,6 @@ package org.streamingpool.ext.tensorics.streamfactory;
 
 import static io.reactivex.Flowable.fromPublisher;
 
-import java.util.Optional;
-
-import org.reactivestreams.Publisher;
 import org.streamingpool.core.domain.ErrorStreamPair;
 import org.streamingpool.core.service.DiscoveryService;
 import org.streamingpool.core.service.StreamFactory;

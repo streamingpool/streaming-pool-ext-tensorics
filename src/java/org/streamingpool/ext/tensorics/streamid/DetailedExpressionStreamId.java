@@ -34,7 +34,7 @@ import org.tensorics.core.tree.domain.ResolvingContext;
 
 /**
  * A {@link StreamId} that encapsulates an {@link Expression} and provides detailed information about its resolution (
- * {@link DetailedResolvedExpression}).
+ * {@link DetailedExpressionResult}).
  *
  * @param <R> the type of the data the source expression resolves
  * @param <E> the type of the expression that is wrapped

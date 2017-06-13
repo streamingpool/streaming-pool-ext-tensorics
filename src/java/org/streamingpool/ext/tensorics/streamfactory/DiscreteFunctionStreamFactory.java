@@ -22,10 +22,7 @@
 
 package org.streamingpool.ext.tensorics.streamfactory;
 
-import static java.util.Optional.of;
-
 import java.util.List;
-import java.util.Optional;
 
 import org.reactivestreams.Publisher;
 import org.streamingpool.core.domain.ErrorStreamPair;

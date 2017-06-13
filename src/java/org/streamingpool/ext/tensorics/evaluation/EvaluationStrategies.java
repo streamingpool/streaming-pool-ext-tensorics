@@ -30,7 +30,7 @@ public class EvaluationStrategies {
         /* only static methods */
     }
 
-    public static final EvaluationStrategy defaultEvaluation() {
+    public static EvaluationStrategy defaultEvaluation() {
         return DEFAULT_EVALUATION_STRATEGY;
     }
 

@@ -25,7 +25,6 @@ package org.streamingpool.ext.tensorics.streamfactory;
 import static java.lang.String.format;
 import static io.reactivex.Flowable.fromPublisher;
 import static io.reactivex.Flowable.zip;
-import static java.util.Optional.of;
 import static java.util.stream.Collectors.toList;
 
 import java.util.Collection;
@@ -33,9 +32,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Optional;
 
-import org.reactivestreams.Publisher;
 import org.streamingpool.core.domain.ErrorStreamPair;
 import org.streamingpool.core.service.DiscoveryService;
 import org.streamingpool.core.service.StreamFactory;
@@ -73,9 +70,7 @@ public class DetailedTensoricsExpressionStreamFactory implements StreamFactory {
 
     private static final HandleWithFirstCapableAncestorStrategy EXCEPTION_HANDLING_STRATEGY = new HandleWithFirstCapableAncestorStrategy();
 
-    private static final Function<Object[], Boolean> TRIGGER_CONTEXT_COMBINER = (Object... entriesToCombine) -> {
-        return true;
-    };
+    private static final Function<Object[], Boolean> TRIGGER_CONTEXT_COMBINER = (Object... entriesToCombine) -> true;
 
     private static final Function<Object[], ResolvingContext> CONTEXT_COMBINER = (Object... entriesToCombine) -> {
         EditableResolvingContext context = Contexts.newResolvingContext();
@@ -154,8 +149,8 @@ public class DetailedTensoricsExpressionStreamFactory implements StreamFactory {
         return mapBuilder.build();
     }
 
-    private static final Flowable<?> triggerObservable(Map<StreamId<?>, ? extends Flowable<?>> flowables,
-            EvaluationStrategy strategy, DiscoveryService discoveryService) {
+    private static Flowable<?> triggerObservable(Map<StreamId<?>, ? extends Flowable<?>> flowables,
+                                                 EvaluationStrategy strategy, DiscoveryService discoveryService) {
         if (strategy instanceof ContinuousEvaluation) {
             return Flowable.combineLatest(flowables.values(), TRIGGER_CONTEXT_COMBINER);
         }

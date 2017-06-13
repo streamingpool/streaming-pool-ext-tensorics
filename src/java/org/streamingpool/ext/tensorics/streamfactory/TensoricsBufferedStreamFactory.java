@@ -23,11 +23,9 @@
 package org.streamingpool.ext.tensorics.streamfactory;
 
 import static io.reactivex.Flowable.fromPublisher;
-import static java.util.Optional.of;
 import static java.util.concurrent.TimeUnit.NANOSECONDS;
 
 import java.time.Duration;
-import java.util.Optional;
 
 import org.reactivestreams.Publisher;
 import org.streamingpool.core.domain.ErrorStreamPair;
