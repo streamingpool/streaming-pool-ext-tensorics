@@ -28,10 +28,10 @@ import org.springframework.context.annotation.Import;
 import org.streamingpool.ext.tensorics.conf.TensoricsStreamingConfiguration;
 import org.tensorics.core.resolve.engine.ResolvingEngine;
 import org.tensorics.core.resolve.engine.ResolvingEngines;
+import org.tensorics.core.resolve.resolvers.IterableResolvingExpressionResolver;
 import org.tensorics.core.resolve.resolvers.PickResolver;
-import org.tensorics.expression.resolvers.IterableResolvingExpressionResolver;
-import org.tensorics.expression.resolvers.PredicateConditionResolver;
-import org.tensorics.expression.resolvers.WindowedExpressionResolver;
+import org.tensorics.core.resolve.resolvers.PredicateConditionResolver;
+import org.tensorics.core.resolve.resolvers.WindowedExpressionResolver;
 
 @Configuration
 @Import({ TensoricsStreamingConfiguration.class })
