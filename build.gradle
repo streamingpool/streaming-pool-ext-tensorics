@@ -1,44 +1,66 @@
 buildscript {
+    project.ext.CERN_VM = System.getProperty('CERN_TECHNET_VM') ?: System.getenv('CERN_TECHNET_VM') ?: false
+    project.ext.TRAVIS_CI = System.getProperty('TRAVIS') ?: System.getenv('TRAVIS') ?: false
+    project.ext.DEPLOYMENT = System.getProperty('deployment') ?: false
+    project.ext.VCS_TAG = System.getProperty('TRAVIS_TAG') ?: System.getenv('TRAVIS_TAG')
+    project.ext.POM = [
+            groupId    : 'org.streamingpool',
+            artifactId : 'streamingpool-ext-tensorics',
+            description: 'This project is a link between streamingpool-core and tensorics projects.',
+            developers : [[
+                                  id   : 'streamingpool-dev',
+                                  name : 'Streamingpool Developers',
+                                  email: 'streamingpool-dev@cern.ch'
+                          ]]
+    ]
+    project.ext.INFO = [
+            repo        : 'https://github.com/streamingpool/streamingpool-ext-tensorics.git',
+            url         : 'http://www.streamingpool.org/',
+            github      : 'https://github.com/streamingpool/streamingpool-ext-tensorics',
+            githubIssues: 'https://github.com/streamingpool/streamingpool-ext-tensorics/issues'
+    ]
+    project.ext.BINTRAY = [
+            repo        : 'streamingpool-repos',
+            name        : 'org.streamingpool:streamingpool-ext-tensorics',
+            organization: 'streamingpool',
+            userName    : 'streamingpool-dev',
+            apiToken    : System.getenv('BINTRAY_API_TOKEN')
+    ]
     repositories {
-        if (System.getenv('BUILD_SERVER') || System.getProperty('CERN_TECHNET_VM')) {
-            maven {
-                url 'http://artifactory.cern.ch/repo'
-            }
-            maven {
-                url 'http://artifactory.cern.ch/jcenter'
-            }
+        if (CERN_VM) {
+            maven { url 'http://artifactory.cern.ch/repo' }
+            maven { url 'http://artifactory.cern.ch/jcenter' }
         } else {
             mavenCentral()
             jcenter()
         }
     }
     dependencies {
-        classpath "io.codearte.gradle.nexus:gradle-nexus-staging-plugin:0.9.0"
+        classpath 'com.netflix.nebula:nebula-publishing-plugin:5.1.0'
+        classpath 'com.jfrog.bintray.gradle:gradle-bintray-plugin:1.7.3'
     }
 }
 
+apply plugin: 'java'
+apply plugin: 'jacoco'
+apply plugin: 'maven'
+apply plugin: 'maven-publish'
+apply plugin: 'nebula.maven-publish'
+apply plugin: 'com.jfrog.bintray'
+
 repositories {
-    if (System.getenv('BUILD_SERVER') || System.getProperty('CERN_TECHNET_VM')) {
-        maven {
-            url 'http://artifactory.cern.ch/repo'
-        }
-        maven {
-            url 'http://artifactory.cern.ch/jcenter'
-        }
+    if (CERN_VM) {
+        maven { url 'http://artifactory.cern.ch/repo' }
+        maven { url 'http://artifactory.cern.ch/jcenter' }
     } else {
         mavenCentral()
         jcenter()
     }
 }
 
-apply plugin: 'java'
-apply plugin: 'maven'
-apply plugin: 'signing'
-apply plugin: 'jacoco'
-
-if (System.getenv('TRAVIS')) {
-    apply plugin: 'io.codearte.nexus-staging'
-    apply from: './scripts/deploy.gradle'
+if (DEPLOYMENT) {
+    println 'Applying deployment scripts'
+    apply from: './scripts/bintray-deploy.gradle'
 }
 
 group 'org.streamingpool'
@@ -78,7 +100,7 @@ sourceSets {
 
 javadoc { options.encoding = "UTF-8" }
 
-task wrapper(type: Wrapper) { gradleVersion = '3.5' }
+task wrapper(type: Wrapper) { gradleVersion = '4.0' }
 
 task javadocJar(type: Jar) {
     classifier = 'javadoc'
@@ -95,7 +117,7 @@ artifacts { archives javadocJar, sourcesJar }
 jacocoTestReport {
     reports {
         xml.enabled true
-        xml.destination "${buildDir}/reports/jacoco/report.xml"
+        xml.destination new File("${buildDir}/reports/jacoco/report.xml")
         html.enabled true
         csv.enabled false
     }
