@@ -28,7 +28,7 @@ import org.tensorics.core.resolve.engine.ResolvingEngine;
 import org.tensorics.core.resolve.engine.ResolvingEngines;
 
 @Configuration
-public class DefaultResolvingEngineConfiguration {
+public class ResolvingEngineConfiguration {
 
     @Bean
     public ResolvingEngine defaultResolvingEngine() {

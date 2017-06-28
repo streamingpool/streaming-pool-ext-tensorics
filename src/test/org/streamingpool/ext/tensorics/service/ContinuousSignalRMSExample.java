@@ -37,7 +37,7 @@ import org.streamingpool.core.service.StreamId;
 import org.streamingpool.core.support.RxStreamSupport;
 import org.streamingpool.core.testing.AbstractStreamTest;
 import org.streamingpool.core.testing.NamedStreamId;
-import org.streamingpool.ext.tensorics.conf.DefaultResolvingEngineConfiguration;
+import org.streamingpool.ext.tensorics.conf.ResolvingEngineConfiguration;
 import org.streamingpool.ext.tensorics.conf.TensoricsStreamingConfiguration;
 import org.streamingpool.ext.tensorics.expression.StreamIdBasedExpression;
 import org.streamingpool.ext.tensorics.streamid.BufferedStreamId;
@@ -56,7 +56,7 @@ import io.reactivex.Flowable;
  * 
  * @author caguiler, kfuchsbe
  */
-@ContextConfiguration(classes = { DefaultResolvingEngineConfiguration.class, TensoricsStreamingConfiguration.class })
+@ContextConfiguration(classes = { ResolvingEngineConfiguration.class, TensoricsStreamingConfiguration.class })
 public class ContinuousSignalRMSExample extends AbstractStreamTest implements RxStreamSupport, TensoricsStreamSupport {
 
     private static StreamId<Pair<Instant, Double>> ID_VALUES = NamedStreamId.ofName("VALUES_A");
