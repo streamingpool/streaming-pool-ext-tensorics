@@ -2,7 +2,7 @@
 /**
 *
 * This file is part of streaming pool (http://www.streamingpool.org).
-* 
+*
 * Copyright (c) 2017-present, CERN. All rights reserved.
 *
 * Licensed under the Apache License, Version 2.0 (the "License");
@@ -16,22 +16,22 @@
 * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 * See the License for the specific language governing permissions and
 * limitations under the License.
-* 
+*
 */
 // @formatter:on
 
 package org.streamingpool.ext.tensorics.streamid;
 
+import static io.reactivex.Flowable.interval;
+import static io.reactivex.Flowable.just;
+import static io.reactivex.Flowable.merge;
+import static io.reactivex.Flowable.never;
 import static java.util.Arrays.asList;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static java.util.function.Function.identity;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
-import static io.reactivex.Flowable.interval;
-import static io.reactivex.Flowable.just;
-import static io.reactivex.Flowable.merge;
-import static io.reactivex.Flowable.never;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -40,11 +40,11 @@ import java.util.List;
 import org.junit.Test;
 import org.streamingpool.core.service.StreamId;
 import org.streamingpool.core.service.streamid.BufferSpecification;
-import org.streamingpool.core.service.streamid.OverlapBufferStreamId;
 import org.streamingpool.core.service.streamid.BufferSpecification.EndStreamMatcher;
+import org.streamingpool.core.service.streamid.OverlapBufferStreamId;
 import org.streamingpool.core.support.RxStreamSupport;
 import org.streamingpool.core.testing.AbstractStreamTest;
-import org.streamingpool.ext.tensorics.streamid.TensorConverterStreamId;
+import org.tensorics.core.lang.Tensorics;
 import org.tensorics.core.tensor.Position;
 import org.tensorics.core.tensor.Tensor;
 
@@ -65,7 +65,7 @@ public class TensorConverterStreamIdTest extends AbstractStreamTest implements R
         List<Tensor<Integer>> values = valuesOf(tensorConverterStreamId);
 
         assertThat(values).hasSize(1);
-        assertThat(values.get(0).asMap().values()).containsAll(data);
+        assertThat(Tensorics.mapFrom(values.get(0)).values()).containsAll(data);
     }
 
     @Test(expected = IllegalArgumentException.class)
@@ -98,7 +98,7 @@ public class TensorConverterStreamIdTest extends AbstractStreamTest implements R
         List<Tensor<Long>> values = valuesOf(tensorId);
 
         assertThat(values).hasSize(1);
-        assertThat(values.get(0).asMap().values()).containsOnly(1L, 2L, 3L, 4L, 5L);
+        assertThat(Tensorics.mapFrom(values.get(0)).values()).containsOnly(1L, 2L, 3L, 4L, 5L);
     }
 
     private <T> List<T> valuesOf(StreamId<T> streamId) {

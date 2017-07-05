@@ -2,7 +2,7 @@
 /**
 *
 * This file is part of streaming pool (http://www.streamingpool.org).
-* 
+*
 * Copyright (c) 2017-present, CERN. All rights reserved.
 *
 * Licensed under the Apache License, Version 2.0 (the "License");
@@ -16,7 +16,7 @@
 * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 * See the License for the specific language governing permissions and
 * limitations under the License.
-* 
+*
 */
 // @formatter:on
 
@@ -35,7 +35,7 @@ import org.junit.Test;
 import org.streamingpool.core.service.StreamId;
 import org.streamingpool.core.support.RxStreamSupport;
 import org.streamingpool.core.testing.AbstractStreamTest;
-import org.streamingpool.ext.tensorics.streamid.ZeroDimensionalTensorConverterStreamId;
+import org.tensorics.core.lang.Tensorics;
 import org.tensorics.core.tensor.Tensor;
 
 import io.reactivex.Flowable;
@@ -56,7 +56,7 @@ public class ZeroDimensionalTensorConverterStreamIdTest extends AbstractStreamTe
 
         assertThat(values).hasSameSizeAs(data);
 
-        List<Integer> tensorsData = values.stream().map(Tensor::asMap).map(Map::values).flatMap(Collection::stream)
+        List<Integer> tensorsData = values.stream().map(Tensorics::mapFrom).map(Map::values).flatMap(Collection::stream)
                 .collect(toList());
         assertThat(tensorsData).containsAll(data);
     }

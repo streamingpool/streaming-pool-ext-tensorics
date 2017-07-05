@@ -22,9 +22,9 @@
 
 package org.streamingpool.ext.tensorics.streamfactory;
 
-import static java.lang.String.format;
 import static io.reactivex.Flowable.fromPublisher;
 import static io.reactivex.Flowable.zip;
+import static java.lang.String.format;
 import static java.util.stream.Collectors.toList;
 
 import java.util.Collection;

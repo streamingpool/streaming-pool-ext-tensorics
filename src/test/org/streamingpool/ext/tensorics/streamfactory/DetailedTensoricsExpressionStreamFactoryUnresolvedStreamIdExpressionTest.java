@@ -35,7 +35,6 @@ import org.junit.Test;
 import org.streamingpool.core.service.StreamId;
 import org.streamingpool.ext.tensorics.expression.StreamIdBasedExpression;
 import org.streamingpool.ext.tensorics.expression.UnresolvedStreamIdBasedExpression;
-import org.streamingpool.ext.tensorics.streamfactory.DetailedTensoricsExpressionStreamFactory;
 import org.streamingpool.ext.tensorics.streamid.DetailedExpressionStreamId;
 import org.tensorics.core.tree.domain.AbstractDeferredExpression;
 import org.tensorics.core.tree.domain.Contexts;

@@ -25,7 +25,6 @@ package org.streamingpool.ext.tensorics.conf;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
-import org.streamingpool.ext.tensorics.conf.TensoricsStreamingConfiguration;
 import org.tensorics.core.resolve.engine.ResolvingEngine;
 import org.tensorics.core.resolve.engine.ResolvingEngines;
 import org.tensorics.core.resolve.resolvers.IterableResolvingExpressionResolver;

@@ -29,7 +29,6 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.streamingpool.core.service.StreamId;
-import org.streamingpool.ext.tensorics.evaluation.TriggeredEvaluation;
 
 public class TriggeredEvaluationTest {
 
