@@ -28,7 +28,6 @@ import static java.lang.String.format;
 import static java.util.stream.Collectors.toList;
 
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -45,6 +44,7 @@ import org.streamingpool.ext.tensorics.evaluation.TriggeredEvaluation;
 import org.streamingpool.ext.tensorics.exception.NoBufferedStreamSpecifiedException;
 import org.streamingpool.ext.tensorics.expression.UnresolvedStreamIdBasedExpression;
 import org.streamingpool.ext.tensorics.streamid.DetailedExpressionStreamId;
+import org.tensorics.core.expressions.Placeholder;
 import org.tensorics.core.resolve.domain.DetailedExpressionResult;
 import org.tensorics.core.resolve.engine.ResolvedContextDidNotGrowException;
 import org.tensorics.core.resolve.engine.ResolvingEngine;
@@ -58,7 +58,9 @@ import org.tensorics.core.tree.walking.Trees;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableMap.Builder;
+import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Multimap;
 
 import io.reactivex.Flowable;
 import io.reactivex.functions.Function;
@@ -80,6 +82,7 @@ public class DetailedTensoricsExpressionStreamFactory implements StreamFactory {
                 context.put(castedEntry.node, castedEntry.value);
             }
         }
+
         return context;
     };
 
@@ -102,19 +105,24 @@ public class DetailedTensoricsExpressionStreamFactory implements StreamFactory {
     private <T, E extends Expression<T>> Flowable<DetailedExpressionResult<T, E>> resolvedStream(
             DetailedExpressionStreamId<T, E> id, DiscoveryService discoveryService) {
         E expression = id.expression();
-        ResolvingContext initialCtx = id.initialCtx();
+        ResolvingContext initialCtx = id.initialContext();
 
         Map<Expression<Object>, StreamId<Object>> streamIds = streamIdsFrom(id);
-        Map<StreamId<?>, Flowable<ExpToValue>> observableEntries = new HashMap<>();
+        ImmutableMultimap.Builder<StreamId<?>, Flowable<ExpToValue>> builder = ImmutableMultimap.builder();
         for (Entry<Expression<Object>, StreamId<Object>> entry : streamIds.entrySet()) {
             Flowable<?> plainObservable = fromPublisher(discoveryService.discover(entry.getValue()));
             Flowable<ExpToValue> mappedObservable;
             mappedObservable = plainObservable.map(obj -> new ExpToValue(entry.getKey(), obj));
-            observableEntries.put(entry.getValue(), mappedObservable);
+            builder.put(entry.getValue(), mappedObservable);
         }
+        ImmutableMultimap<StreamId<?>, Flowable<ExpToValue>> observableEntries = builder.build();
 
-        return triggerObservable(observableEntries, id.evaluationStrategy(), discoveryService)
-                .withLatestFrom(observableEntries.values().toArray(new Flowable[] {}), CONTEXT_COMBINER).map(ctx -> {
+        EvaluationStrategy evaluationStrategy = initialCtx
+                .resolvedValueOf(Placeholder.ofClass(EvaluationStrategy.class));
+
+        Flowable<?> triggerObservable = triggerObservable(observableEntries, evaluationStrategy, discoveryService);
+        return triggerObservable.withLatestFrom(observableEntries.values().toArray(new Flowable[] {}), CONTEXT_COMBINER)
+                .map(ctx -> {
                     EditableResolvingContext fullContext = Contexts.newResolvingContext();
                     fullContext.putAllNew(ctx);
                     fullContext.putAllNew(initialCtx);
@@ -128,7 +136,7 @@ public class DetailedTensoricsExpressionStreamFactory implements StreamFactory {
     <T extends Expression<?>> Map<Expression<Object>, StreamId<Object>> streamIdsFrom(
             DetailedExpressionStreamId<?, T> id) {
         Expression<?> rootExpression = id.expression();
-        ResolvingContext initialCtx = id.initialCtx();
+        ResolvingContext initialCtx = id.initialContext();
 
         Collection<UnresolvedStreamIdBasedExpression> unresolvedStreamIdExpressions = Trees
                 .findNodesOfClass(rootExpression, UnresolvedStreamIdBasedExpression.class);
@@ -149,13 +157,13 @@ public class DetailedTensoricsExpressionStreamFactory implements StreamFactory {
         return mapBuilder.build();
     }
 
-    private static Flowable<?> triggerObservable(Map<StreamId<?>, ? extends Flowable<?>> flowables,
-                                                 EvaluationStrategy strategy, DiscoveryService discoveryService) {
+    private static Flowable<?> triggerObservable(Multimap<StreamId<?>, ? extends Flowable<?>> flowables,
+            EvaluationStrategy strategy, DiscoveryService discoveryService) {
         if (strategy instanceof ContinuousEvaluation) {
             return Flowable.combineLatest(flowables.values(), TRIGGER_CONTEXT_COMBINER);
         }
         if (strategy instanceof BufferedEvaluation) {
-            List<? extends Flowable<?>> triggeringObservables = flowables.entrySet().stream()
+            List<? extends Flowable<?>> triggeringObservables = flowables.entries().stream()
                     .filter(e -> (e.getKey() instanceof OverlapBufferStreamId)).map(Entry::getValue).collect(toList());
             if (triggeringObservables.isEmpty()) {
                 throw new NoBufferedStreamSpecifiedException();
@@ -179,6 +187,12 @@ public class DetailedTensoricsExpressionStreamFactory implements StreamFactory {
 
         private final Expression<Object> node;
         private final Object value;
+
+        @Override
+        public String toString() {
+            return "ExpToValue [node=" + node + ", value=" + value + "]";
+        }
+
     }
 
 }

@@ -27,8 +27,10 @@ import static java.util.Objects.requireNonNull;
 import org.streamingpool.core.service.StreamId;
 import org.streamingpool.ext.tensorics.evaluation.EvaluationStrategies;
 import org.streamingpool.ext.tensorics.evaluation.EvaluationStrategy;
+import org.tensorics.core.expressions.Placeholder;
 import org.tensorics.core.resolve.domain.DetailedExpressionResult;
 import org.tensorics.core.tree.domain.Contexts;
+import org.tensorics.core.tree.domain.EditableResolvingContext;
 import org.tensorics.core.tree.domain.Expression;
 import org.tensorics.core.tree.domain.ResolvingContext;
 
@@ -43,46 +45,43 @@ public class DetailedExpressionStreamId<R, E extends Expression<R>>
         implements StreamId<DetailedExpressionResult<R, E>> {
 
     private final E expression;
-    private final EvaluationStrategy evaluationStrategy;
     private final ResolvingContext initialCtx;
 
-    protected DetailedExpressionStreamId(E expression, EvaluationStrategy evaluationStrategy,
-            ResolvingContext initialCtx) {
+    protected DetailedExpressionStreamId(E expression, ResolvingContext initialCtx) {
         this.initialCtx = requireNonNull(initialCtx, "initialCtx must not be null.");
         this.expression = requireNonNull(expression, "expression must not be null.");
-        this.evaluationStrategy = requireNonNull(evaluationStrategy, "evaluationStrategy must not be null.");
     }
 
     public static <R, E extends Expression<R>> DetailedExpressionStreamId<R, E> of(E expression) {
-        return of(expression, EvaluationStrategies.defaultEvaluation());
+        EditableResolvingContext initialCtx = Contexts.newResolvingContext();
+        initialCtx.put(Placeholder.ofClass(EvaluationStrategy.class), EvaluationStrategies.defaultEvaluation());
+        return of(expression, initialCtx);
     }
 
     public static <R, E extends Expression<R>> DetailedExpressionStreamId<R, E> of(E expression,
-            EvaluationStrategy evaluationStrategy) {
-        return new DetailedExpressionStreamId<>(expression, evaluationStrategy, Contexts.newResolvingContext());
-    }
-
-    public static <R, E extends Expression<R>> DetailedExpressionStreamId<R, E> of(E expression,
-            EvaluationStrategy evaluationStrategy, ResolvingContext initialCtx) {
-        return new DetailedExpressionStreamId<>(expression, evaluationStrategy, initialCtx);
+            ResolvingContext initialCtx) {
+        if (!initialCtx.resolves(Placeholder.ofClass(EvaluationStrategy.class))) {
+            throw new IllegalArgumentException(
+                    "The initial context does not provide a value for a placeholder of EvaluationStrategy");
+        }
+        return new DetailedExpressionStreamId<>(expression, initialCtx);
     }
 
     public E expression() {
         return expression;
     }
 
-    public EvaluationStrategy evaluationStrategy() {
-        return evaluationStrategy;
-    }
-
-    public ResolvingContext initialCtx() {
+    public ResolvingContext initialContext() {
         return initialCtx;
     }
 
     @Override
     public int hashCode() {
+        EvaluationStrategy evStrategy = initialCtx.resolvedValueOf(Placeholder.ofClass(EvaluationStrategy.class));
+
         final int prime = 31;
         int result = 1;
+        result = prime * result + ((evStrategy == null) ? 0 : evStrategy.hashCode());
         result = prime * result + ((expression == null) ? 0 : expression.hashCode());
         return result;
     }
@@ -99,6 +98,10 @@ public class DetailedExpressionStreamId<R, E extends Expression<R>>
             return false;
         }
         DetailedExpressionStreamId<?, ?> other = (DetailedExpressionStreamId<?, ?>) obj;
+        EvaluationStrategy evStrategy = initialCtx.resolvedValueOf(Placeholder.ofClass(EvaluationStrategy.class));
+        EvaluationStrategy otherEvStrategy = other.initialContext()
+                .resolvedValueOf(Placeholder.ofClass(EvaluationStrategy.class));
+
         if (expression == null) {
             if (other.expression != null) {
                 return false;
@@ -106,12 +109,19 @@ public class DetailedExpressionStreamId<R, E extends Expression<R>>
         } else if (!expression.equals(other.expression)) {
             return false;
         }
+        if (evStrategy == null) {
+            if (otherEvStrategy != null) {
+                return false;
+            }
+        } else if (!evStrategy.equals(otherEvStrategy)) {
+            return false;
+        }
         return true;
     }
 
     @Override
     public String toString() {
-        return "DetailedExpressionStreamId [expression=" + expression + "]";
+        return "DetailedExpressionStreamId [expression=" + expression + ", initialCtx=" + initialCtx + "]";
     }
 
 }

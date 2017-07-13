@@ -106,7 +106,7 @@ public class DetailedTensoricsExpressionStreamFactoryUnresolvedStreamIdExpressio
             ResolvingContext initialCtx, GroupExpression group) {
         DetailedExpressionStreamId<Void, GroupExpression> detailedId = mock(DetailedExpressionStreamId.class);
         when(detailedId.expression()).thenReturn(group);
-        when(detailedId.initialCtx()).thenReturn(initialCtx);
+        when(detailedId.initialContext()).thenReturn(initialCtx);
         return detailedId;
     }
 
@@ -126,6 +126,8 @@ public class DetailedTensoricsExpressionStreamFactoryUnresolvedStreamIdExpressio
      */
     private static class GroupExpression extends AbstractDeferredExpression<Void> {
 
+        private static final long serialVersionUID = 1L;
+        
         private final List<Expression<?>> expressions;
 
         public GroupExpression(List<Expression<?>> expressions) {
