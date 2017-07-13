@@ -49,6 +49,7 @@ import org.tensorics.core.tensor.Position;
 import org.tensorics.core.tensor.Tensor;
 
 import io.reactivex.Flowable;
+import io.reactivex.schedulers.TestScheduler;
 import io.reactivex.subscribers.TestSubscriber;
 
 public class TensorConverterStreamIdTest extends AbstractStreamTest implements RxStreamSupport {
@@ -76,15 +77,17 @@ public class TensorConverterStreamIdTest extends AbstractStreamTest implements R
             /**/};
 
         TensorConverterStreamId
-                .of(dummyStreamId, invalidPositions::get, identity(), Collections.singleton(Integer.class))
-                .conversion().apply(data);
+                .of(dummyStreamId, invalidPositions::get, identity(), Collections.singleton(Integer.class)).conversion()
+                .apply(data);
     }
 
     @Test
     public void integrationWithOverlappingBufferStreamId() {
-        Flowable<Long> sourceStream = interval(1, SECONDS).take(6);
-        Flowable<String> startStream = merge(just("FLAG").delay(1500, MILLISECONDS), never());
-        Flowable<String> endStream = startStream.delay(5, SECONDS);
+        TestSubscriber<Tensor<Long>> testSubscriber = new TestSubscriber<>();
+        TestScheduler testScheduler = new TestScheduler();
+        Flowable<Long> sourceStream = interval(1, SECONDS, testScheduler).take(6);
+        Flowable<String> startStream = merge(just("FLAG").delay(1500, MILLISECONDS, testScheduler), never());
+        Flowable<String> endStream = startStream.delay(5500, MILLISECONDS, testScheduler);
 
         StreamId<Long> sourceId = provide(sourceStream).withUniqueStreamId();
         StreamId<String> startId = provide(startStream).withUniqueStreamId();
@@ -95,10 +98,11 @@ public class TensorConverterStreamIdTest extends AbstractStreamTest implements R
         TensorConverterStreamId<Long, Long> tensorId = TensorConverterStreamId.of(bufferId, Position::of, identity(),
                 Collections.singleton(Long.class));
 
-        List<Tensor<Long>> values = valuesOf(tensorId);
-
-        assertThat(values).hasSize(1);
-        assertThat(Tensorics.mapFrom(values.get(0)).values()).containsOnly(1L, 2L, 3L, 4L, 5L);
+        rxFrom(tensorId).subscribe(testSubscriber);
+        
+        testScheduler.advanceTimeBy(8, SECONDS);
+        testSubscriber.assertValueCount(1);
+        testSubscriber.assertValueAt(0, v -> asList(0L, 1L, 2L, 3L, 4L).containsAll(Tensorics.mapFrom(v).values()));
     }
 
     private <T> List<T> valuesOf(StreamId<T> streamId) {

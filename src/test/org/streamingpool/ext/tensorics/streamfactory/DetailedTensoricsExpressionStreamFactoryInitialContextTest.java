@@ -79,7 +79,7 @@ public class DetailedTensoricsExpressionStreamFactoryInitialContextTest extends 
         subscriber.awaitTerminalEvent();
 
         assertThat(subscriber.errors()).hasSize(1);
-        assertThat(subscriber.errors().get(0)).isInstanceOf(ResolvedContextDidNotGrowException.class);
+        assertThat(subscriber.errors().get(0)).isInstanceOf(IllegalStateException.class);
     }
 
     @Test
