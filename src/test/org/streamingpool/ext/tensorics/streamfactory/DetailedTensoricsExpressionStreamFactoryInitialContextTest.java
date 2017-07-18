@@ -48,7 +48,6 @@ import org.streamingpool.ext.tensorics.evaluation.EvaluationStrategy;
 import org.streamingpool.ext.tensorics.evaluation.TriggeredEvaluation;
 import org.tensorics.core.expressions.Placeholder;
 import org.tensorics.core.resolve.domain.DetailedExpressionResult;
-import org.tensorics.core.resolve.engine.ResolvedContextDidNotGrowException;
 import org.tensorics.core.tree.domain.AbstractDeferredExpression;
 import org.tensorics.core.tree.domain.Contexts;
 import org.tensorics.core.tree.domain.EditableResolvingContext;

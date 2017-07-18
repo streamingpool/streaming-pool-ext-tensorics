@@ -41,6 +41,7 @@ import org.tensorics.core.tensor.Tensor;
  * @param <U> the type of the Tensor values
  */
 public class ZeroDimensionalTensorConverterStreamId<T, U> extends DerivedStreamId<T, Tensor<U>> {
+    private static final long serialVersionUID = 1L;
 
     public static <T> ZeroDimensionalTensorConverterStreamId<T, T> of(StreamId<T> sourceStreamId) {
         return new ZeroDimensionalTensorConverterStreamId<>(sourceStreamId, identity(), any -> Position.empty());

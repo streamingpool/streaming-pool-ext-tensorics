@@ -2,7 +2,7 @@
 /**
 *
 * This file is part of streaming pool (http://www.streamingpool.org).
-* 
+*
 * Copyright (c) 2017-present, CERN. All rights reserved.
 *
 * Licensed under the Apache License, Version 2.0 (the "License");
@@ -16,7 +16,7 @@
 * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 * See the License for the specific language governing permissions and
 * limitations under the License.
-* 
+*
 */
 // @formatter:on
 
@@ -53,7 +53,7 @@ import io.reactivex.Flowable;
 /**
  * An example showing how tensorics expressions and the streaming pool framework are combined in order to perform
  * continuously the rms of an online signal
- * 
+ *
  * @author caguiler, kfuchsbe
  */
 @ContextConfiguration(classes = { ResolvingEngineConfiguration.class, TensoricsStreamingConfiguration.class })
@@ -82,20 +82,23 @@ public class ContinuousSignalRMSExample extends AbstractStreamTest implements Rx
     @Ignore("takes forever")
     @Test
     public void continuousRMS() throws InterruptedException {
-
-        DoubleScript<Double> analysisDescribingRMS = new DoubleScript<Double>() {
-
-            @Override
-            protected Expression<Double> describe() {
-                FunctionExpressionSupportWithConversionAndComparator<Instant, Double> supportWithConversion = withConversionAndComparator(
-                        (Instant t) -> (double) t.toEpochMilli(), Instant::compareTo);
-
-                return supportWithConversion.rmsOfF(SIGNAL);
-            }
-        };
+        DoubleScript<Double> analysisDescribingRMS = new TestScript();
 
         rxFrom(analysisDescribingRMS).subscribe((res) -> System.out.println("rms=" + res));
         Thread.sleep(50000);
     }
 
+
+    private static final class TestScript extends DoubleScript<Double> {
+
+        private static final long serialVersionUID = 1L;
+
+        @Override
+        protected Expression<Double> describe() {
+            FunctionExpressionSupportWithConversionAndComparator<Instant, Double> supportWithConversion = withConversionAndComparator(
+                    (Instant t) -> (double) t.toEpochMilli(), Instant::compareTo);
+
+            return supportWithConversion.rmsOfF(SIGNAL);
+        }
+    }
 }

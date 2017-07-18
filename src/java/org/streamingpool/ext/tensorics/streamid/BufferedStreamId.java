@@ -2,7 +2,7 @@
 /**
 *
 * This file is part of streaming pool (http://www.streamingpool.org).
-* 
+*
 * Copyright (c) 2017-present, CERN. All rights reserved.
 *
 * Licensed under the Apache License, Version 2.0 (the "License");
@@ -16,7 +16,7 @@
 * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 * See the License for the specific language governing permissions and
 * limitations under the License.
-* 
+*
 */
 // @formatter:on
 
@@ -33,19 +33,20 @@ import org.streamingpool.core.service.StreamId;
  * Duration.
  * <p>
  * If no buffer length is given it is set to 1 second by default.
- * 
+ *
  * @author caguiler
  * @param <R> type of the values to buffering
  */
 @Deprecated
 public class BufferedStreamId<R> implements StreamId<List<R>> {
+    private static final long serialVersionUID = 1L;
 
     private final StreamId<R> sourceStream;
     private final Duration windowLength;
 
     /**
      * Builds a {@link BufferedStreamId}
-     * 
+     *
      * @param sourceStream stream id to buffer
      */
     public BufferedStreamId(StreamId<R> sourceStream) {
@@ -54,7 +55,7 @@ public class BufferedStreamId<R> implements StreamId<List<R>> {
 
     /**
      * Builds a {@link BufferedStreamId}
-     * 
+     *
      * @param sourceStream stream id to buffer
      * @param windowLength a duration representing the buffer window length
      */
@@ -72,5 +73,48 @@ public class BufferedStreamId<R> implements StreamId<List<R>> {
 
     public Duration getWindowLength() {
         return windowLength;
+    }
+
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((sourceStream == null) ? 0 : sourceStream.hashCode());
+        result = prime * result + ((windowLength == null) ? 0 : windowLength.hashCode());
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        BufferedStreamId other = (BufferedStreamId) obj;
+        if (sourceStream == null) {
+            if (other.sourceStream != null) {
+                return false;
+            }
+        } else if (!sourceStream.equals(other.sourceStream)) {
+            return false;
+        }
+        if (windowLength == null) {
+            if (other.windowLength != null) {
+                return false;
+            }
+        } else if (!windowLength.equals(other.windowLength)) {
+            return false;
+        }
+        return true;
+    }
+
+    @Override
+    public String toString() {
+        return "BufferedStreamId [sourceStream=" + sourceStream + ", windowLength=" + windowLength + "]";
     }
 }

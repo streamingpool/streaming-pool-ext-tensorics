@@ -2,7 +2,7 @@
 /**
 *
 * This file is part of streaming pool (http://www.streamingpool.org).
-* 
+*
 * Copyright (c) 2017-present, CERN. All rights reserved.
 *
 * Licensed under the Apache License, Version 2.0 (the "License");
@@ -16,7 +16,7 @@
 * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 * See the License for the specific language governing permissions and
 * limitations under the License.
-* 
+*
 */
 // @formatter:on
 
@@ -30,11 +30,12 @@ import org.tensorics.core.tree.domain.Expression;
 /**
  * A stream id backed by a tensorics expression. It can be used to request a stream of the expression (resolved) from
  * the streaming pool.
- * 
+ *
  * @author kfuchsbe, caguiler
  * @param <R> the return type of the expression (and thus the type of the elements of the resulting stream)
  */
 public class ExpressionBasedStreamId<R> implements StreamId<R> {
+    private static final long serialVersionUID = 1L;
 
     private final DetailedExpressionStreamId<R, ?> expression;
 
