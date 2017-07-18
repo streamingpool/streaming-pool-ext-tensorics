@@ -4,7 +4,7 @@
 
 package org.streamingpool.ext.tensorics;
 
-import org.streamingpool.core.testing.SerializableHasUid;
+import org.streamingpool.ext.tensorics.testing.SerializableHasUid;
 
 public class AllSerializableHaveUidTest extends SerializableHasUid {
 

@@ -5,7 +5,7 @@
 package org.streamingpool.ext.tensorics;
 
 import org.streamingpool.core.service.StreamId;
-import org.streamingpool.core.testing.TransportableEntityFulfilled;
+import org.streamingpool.ext.tensorics.testing.TransportableEntityFulfilled;
 import org.tensorics.core.tree.domain.Expression;
 
 public class TransportableEntitiesFulfillContractTest extends TransportableEntityFulfilled {
