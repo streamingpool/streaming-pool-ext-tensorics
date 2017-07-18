@@ -24,6 +24,8 @@ package org.streamingpool.ext.tensorics.streamid;
 
 import static java.util.Objects.requireNonNull;
 
+import java.io.Serializable;
+
 import org.streamingpool.core.service.StreamId;
 import org.streamingpool.ext.tensorics.evaluation.EvaluationStrategies;
 import org.streamingpool.ext.tensorics.evaluation.EvaluationStrategy;
@@ -42,7 +44,7 @@ import org.tensorics.core.tree.domain.ResolvingContext;
  * @param <E> the type of the expression that is wrapped
  */
 public class DetailedExpressionStreamId<R, E extends Expression<R>>
-        implements StreamId<DetailedExpressionResult<R, E>> {
+        implements StreamId<DetailedExpressionResult<R, E>>, Serializable {
     private static final long serialVersionUID = 1L;
 
     private final E expression;

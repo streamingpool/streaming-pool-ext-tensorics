@@ -24,6 +24,8 @@ package org.streamingpool.ext.tensorics.streamid;
 
 import static java.util.Objects.requireNonNull;
 
+import java.io.Serializable;
+
 import org.streamingpool.core.service.StreamId;
 import org.tensorics.core.tree.domain.Expression;
 
@@ -34,7 +36,7 @@ import org.tensorics.core.tree.domain.Expression;
  * @author kfuchsbe, caguiler
  * @param <R> the return type of the expression (and thus the type of the elements of the resulting stream)
  */
-public class ExpressionBasedStreamId<R> implements StreamId<R> {
+public class ExpressionBasedStreamId<R> implements StreamId<R>, Serializable {
     private static final long serialVersionUID = 1L;
 
     private final DetailedExpressionStreamId<R, ?> expression;

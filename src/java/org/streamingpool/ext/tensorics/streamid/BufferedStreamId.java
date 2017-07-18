@@ -22,6 +22,7 @@
 
 package org.streamingpool.ext.tensorics.streamid;
 
+import java.io.Serializable;
 import java.time.Duration;
 import java.util.List;
 import java.util.Objects;
@@ -38,7 +39,7 @@ import org.streamingpool.core.service.StreamId;
  * @param <R> type of the values to buffering
  */
 @Deprecated
-public class BufferedStreamId<R> implements StreamId<List<R>> {
+public class BufferedStreamId<R> implements StreamId<List<R>>, Serializable {
     private static final long serialVersionUID = 1L;
 
     private final StreamId<R> sourceStream;

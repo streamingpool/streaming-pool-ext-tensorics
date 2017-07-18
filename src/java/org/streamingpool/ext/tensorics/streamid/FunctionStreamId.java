@@ -22,6 +22,8 @@
 
 package org.streamingpool.ext.tensorics.streamid;
 
+import java.io.Serializable;
+
 import org.streamingpool.core.service.StreamId;
 import org.tensorics.core.commons.operations.Conversion;
 import org.tensorics.core.function.DiscreteFunction;
@@ -35,7 +37,7 @@ import org.tensorics.core.function.DiscreteFunction;
  * @param <Y> y values of the resulting {@link DiscreteFunction}
  */
 @Deprecated
-public class FunctionStreamId<T, X, Y> implements StreamId<DiscreteFunction<X, Y>> {
+public class FunctionStreamId<T, X, Y> implements StreamId<DiscreteFunction<X, Y>>, Serializable {
 
     private static final long serialVersionUID = 1L;
     private final BufferedStreamId<T> sourceStream;
