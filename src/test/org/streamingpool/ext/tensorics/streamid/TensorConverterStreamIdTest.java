@@ -74,8 +74,8 @@ public class TensorConverterStreamIdTest extends AbstractStreamTest implements R
         List<Integer> data = asList(0, 1, 2, 3);
         List<Position> invalidPositions = asList(Position.of(1), Position.of(""), Position.of(2), Position.empty());
         StreamId<List<Integer>> dummyStreamId = new StreamId<List<Integer>>() {
-            /**/};
-
+            private static final long serialVersionUID = 1L;
+           };
         TensorConverterStreamId
                 .of(dummyStreamId, invalidPositions::get, identity(), Collections.singleton(Integer.class)).conversion()
                 .apply(data);
@@ -99,10 +99,11 @@ public class TensorConverterStreamIdTest extends AbstractStreamTest implements R
                 Collections.singleton(Long.class));
 
         rxFrom(tensorId).subscribe(testSubscriber);
-        
+
         testScheduler.advanceTimeBy(8, SECONDS);
         testSubscriber.assertValueCount(1);
-        testSubscriber.assertValueAt(0, v -> asList(0L, 1L, 2L, 3L, 4L).containsAll(Tensorics.mapFrom(v).values()));
+        Tensor<Long> firstTensor = testSubscriber.values().get(0);
+        assertThat(Tensorics.mapFrom(firstTensor).values()).containsOnly(0L, 1L, 2L, 3L, 4L);
     }
 
     private <T> List<T> valuesOf(StreamId<T> streamId) {
