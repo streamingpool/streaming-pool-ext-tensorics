@@ -98,8 +98,15 @@ public class DetailedTensoricsExpressionStreamFactory implements StreamFactory {
         if (!(id instanceof DetailedExpressionStreamId)) {
             return ErrorStreamPair.empty();
         }
-        return ErrorStreamPair
-                .ofData((Flowable<T>) resolvedStream((DetailedExpressionStreamId<?, ?>) id, discoveryService));
+        DetailedExpressionStreamId<?, ?> tensoricsId = (DetailedExpressionStreamId<?, ?>) id;
+
+        /* NOTE!!!!!! This class does not creates buffered ids anymore, use BufferedTensoricsExpressionStreamFactory */
+        if (tensoricsId.initialContext()
+                .resolvedValueOf(Placeholder.ofClass(EvaluationStrategy.class)) instanceof BufferedEvaluation) {
+            return ErrorStreamPair.empty();
+        }
+        
+        return ErrorStreamPair.ofData((Flowable<T>) resolvedStream(tensoricsId, discoveryService));
     }
 
     private <T, E extends Expression<T>> Flowable<DetailedExpressionResult<T, E>> resolvedStream(
