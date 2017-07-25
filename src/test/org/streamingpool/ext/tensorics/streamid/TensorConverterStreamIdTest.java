@@ -22,25 +22,23 @@
 
 package org.streamingpool.ext.tensorics.streamid;
 
-import static io.reactivex.Flowable.interval;
 import static io.reactivex.Flowable.just;
-import static io.reactivex.Flowable.merge;
-import static io.reactivex.Flowable.never;
 import static java.util.Arrays.asList;
-import static java.util.concurrent.TimeUnit.MILLISECONDS;
-import static java.util.concurrent.TimeUnit.SECONDS;
+import static java.util.Collections.singleton;
 import static java.util.function.Function.identity;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
+import static org.streamingpool.core.service.streamid.BufferSpecification.ofStartEnd;
+import static org.streamingpool.core.service.streamid.BufferSpecification.EndStreamMatcher.endingOnEvery;
 
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import org.junit.Test;
 import org.streamingpool.core.service.StreamId;
 import org.streamingpool.core.service.streamid.BufferSpecification;
-import org.streamingpool.core.service.streamid.BufferSpecification.EndStreamMatcher;
 import org.streamingpool.core.service.streamid.OverlapBufferStreamId;
 import org.streamingpool.core.support.RxStreamSupport;
 import org.streamingpool.core.testing.AbstractStreamTest;
@@ -48,8 +46,7 @@ import org.tensorics.core.lang.Tensorics;
 import org.tensorics.core.tensor.Position;
 import org.tensorics.core.tensor.Tensor;
 
-import io.reactivex.Flowable;
-import io.reactivex.schedulers.TestScheduler;
+import io.reactivex.processors.PublishProcessor;
 import io.reactivex.subscribers.TestSubscriber;
 
 public class TensorConverterStreamIdTest extends AbstractStreamTest implements RxStreamSupport {
@@ -75,7 +72,7 @@ public class TensorConverterStreamIdTest extends AbstractStreamTest implements R
         List<Position> invalidPositions = asList(Position.of(1), Position.of(""), Position.of(2), Position.empty());
         StreamId<List<Integer>> dummyStreamId = new StreamId<List<Integer>>() {
             private static final long serialVersionUID = 1L;
-           };
+        };
         TensorConverterStreamId
                 .of(dummyStreamId, invalidPositions::get, identity(), Collections.singleton(Integer.class)).conversion()
                 .apply(data);
@@ -83,27 +80,45 @@ public class TensorConverterStreamIdTest extends AbstractStreamTest implements R
 
     @Test
     public void integrationWithOverlappingBufferStreamId() {
-        TestSubscriber<Tensor<Long>> testSubscriber = new TestSubscriber<>();
-        TestScheduler testScheduler = new TestScheduler();
-        Flowable<Long> sourceStream = interval(1, SECONDS, testScheduler).take(6);
-        Flowable<String> startStream = merge(just("FLAG").delay(1500, MILLISECONDS, testScheduler), never());
-        Flowable<String> endStream = startStream.delay(5500, MILLISECONDS, testScheduler);
+        PublishProcessor<Long> sourceStream = PublishProcessor.create();
+        PublishProcessor<String> startStream = PublishProcessor.create();
+        PublishProcessor<String> endStream = PublishProcessor.create();
 
-        StreamId<Long> sourceId = provide(sourceStream).withUniqueStreamId();
-        StreamId<String> startId = provide(startStream).withUniqueStreamId();
-        StreamId<String> endId = provide(endStream).withUniqueStreamId();
+        StreamId<Long> sourceId = provide(sourceStream.onBackpressureBuffer()).withUniqueStreamId();
+        StreamId<String> startId = provide(startStream.onBackpressureBuffer()).withUniqueStreamId();
+        StreamId<String> endId = provide(endStream.onBackpressureBuffer()).withUniqueStreamId();
 
-        OverlapBufferStreamId<Long> bufferId = OverlapBufferStreamId.of(sourceId,
-                BufferSpecification.ofStartEnd(startId, Collections.singleton(EndStreamMatcher.endingOnEvery(endId))));
+        BufferSpecification bufferSpecification = ofStartEnd(startId, singleton(endingOnEvery(endId)));
+        OverlapBufferStreamId<Long> bufferId = OverlapBufferStreamId.of(sourceId, bufferSpecification);
+
         TensorConverterStreamId<Long, Long> tensorId = TensorConverterStreamId.of(bufferId, Position::of, identity(),
                 Collections.singleton(Long.class));
 
-        rxFrom(tensorId).subscribe(testSubscriber);
+        TestSubscriber<Tensor<Long>> testSubscriber = rxFrom(tensorId).test();
 
-        testScheduler.advanceTimeBy(8, SECONDS);
-        testSubscriber.assertValueCount(1);
+        startStream.onNext("A");
+        await();
+
+        sourceStream.onNext(0L);
+        sourceStream.onNext(1L);
+        sourceStream.onNext(2L);
+        sourceStream.onNext(3L);
+        sourceStream.onNext(4L);
+
+        await();
+        endStream.onNext("A");
+
+        testSubscriber.awaitCount(1).assertValueCount(1);
         Tensor<Long> firstTensor = testSubscriber.values().get(0);
         assertThat(Tensorics.mapFrom(firstTensor).values()).containsOnly(0L, 1L, 2L, 3L, 4L);
+    }
+
+    private void await() {
+        try {
+            TimeUnit.MILLISECONDS.sleep(100);
+        } catch (InterruptedException e) {
+            /* */
+        }
     }
 
     private <T> List<T> valuesOf(StreamId<T> streamId) {
