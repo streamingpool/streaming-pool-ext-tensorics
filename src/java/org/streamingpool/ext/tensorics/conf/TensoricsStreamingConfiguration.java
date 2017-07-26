@@ -22,9 +22,9 @@
 
 package org.streamingpool.ext.tensorics.conf;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.streamingpool.ext.tensorics.streamfactory.BufferedTensoricsExpressionStreamFactory;
 import org.streamingpool.ext.tensorics.streamfactory.DetailedTensoricsExpressionStreamFactory;
 import org.streamingpool.ext.tensorics.streamfactory.DiscreteFunctionStreamFactory;
 import org.streamingpool.ext.tensorics.streamfactory.TensoricsBufferedStreamFactory;
@@ -34,8 +34,11 @@ import org.tensorics.core.resolve.engine.ResolvingEngine;
 @Configuration
 public class TensoricsStreamingConfiguration {
 
-    @Autowired
-    private ResolvingEngine resolvingEngine;
+    @Bean
+    public BufferedTensoricsExpressionStreamFactory bufferedTensoricsExpressionStreamFactory(
+            ResolvingEngine resolvingEngine) {
+        return new BufferedTensoricsExpressionStreamFactory(resolvingEngine);
+    }
 
     @Bean
     public TensoricsExpressionStreamFactory tensoricsExpressionStreamFactory() {
@@ -43,7 +46,8 @@ public class TensoricsStreamingConfiguration {
     }
 
     @Bean
-    public DetailedTensoricsExpressionStreamFactory detailedTensoricsExpressionStreamFactory() {
+    public DetailedTensoricsExpressionStreamFactory detailedTensoricsExpressionStreamFactory(
+            ResolvingEngine resolvingEngine) {
         return new DetailedTensoricsExpressionStreamFactory(resolvingEngine);
     }
 
