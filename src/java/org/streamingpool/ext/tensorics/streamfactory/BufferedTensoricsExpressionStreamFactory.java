@@ -100,11 +100,11 @@ public class BufferedTensoricsExpressionStreamFactory implements StreamFactory {
             return bufferedValuesCtx;
         }).map(bufferedValuesCtx -> {
             EditableResolvingContext fullCtx = Contexts.newResolvingContext();
-            fullCtx.putAllNew(bufferedValuesCtx);
+            fullCtx.putAllNew((ResolvingContext) bufferedValuesCtx); /* not building on java 1.8.0_131 otherwise ... */
             fullCtx.putAllNew(initialCtx);
             return fullCtx;
         }).map(ed.emptyOnException(
-                fullCtx -> engine.resolveDetailed(rootExpression, fullCtx, EXCEPTION_HANDLING_STRATEGY)));
+                (ResolvingContext fullCtx) -> engine.resolveDetailed(rootExpression, fullCtx, EXCEPTION_HANDLING_STRATEGY)));
 
         @SuppressWarnings("unchecked") /* safe cast */
         Publisher<Optional<T>> castedResultStream = (Publisher<Optional<T>>) resultStream;
