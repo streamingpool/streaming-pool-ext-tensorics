@@ -22,16 +22,23 @@
 
 package org.streamingpool.ext.tensorics.conf;
 
+import java.util.List;
+
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.tensorics.core.resolve.engine.ResolvingEngine;
 import org.tensorics.core.resolve.engine.ResolvingEngines;
+import org.tensorics.core.resolve.resolvers.Resolver;
 
+/**
+ * Default configuration for a Tensorics {@link ResolvingEngine}. It collects all the {@link Resolver} Beans in the
+ * Spring context. Innclude this class in your configuration if you don't have a {@link ResolvingEngine}.
+ */
 @Configuration
-public class ResolvingEngineConfiguration {
+public class DefaultResolvingEngineConfiguration {
 
     @Bean
-    public ResolvingEngine defaultResolvingEngine() {
-        return ResolvingEngines.defaultEngine();
+    public ResolvingEngine resolvingEngine(List<Resolver<?, ?>> resolvers) {
+        return ResolvingEngines.defaultEngineWithAdditional(resolvers.stream().toArray(Resolver[]::new));
     }
 }
