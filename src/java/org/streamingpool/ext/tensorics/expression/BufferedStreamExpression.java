@@ -41,10 +41,6 @@ public class BufferedStreamExpression<T> extends AbstractDeferredExpression<List
         return streamIdExpression;
     }
 
-    public String name() {
-        return "Buffer of " + streamIdExpression;
-    }
-
     @Override
     public List<? extends Node> getChildren() {
         return Collections.singletonList(streamIdExpression);
