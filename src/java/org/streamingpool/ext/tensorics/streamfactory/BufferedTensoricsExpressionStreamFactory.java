@@ -100,11 +100,13 @@ public class BufferedTensoricsExpressionStreamFactory implements StreamFactory {
             return bufferedValuesCtx;
         }).map(bufferedValuesCtx -> {
             EditableResolvingContext fullCtx = Contexts.newResolvingContext();
-            fullCtx.putAllNew((ResolvingContext) bufferedValuesCtx); /* not building on java 1.8.0_131 otherwise ... */
+            @SuppressWarnings("cast") /* not building on java 1.8.0_131 without explicitly cast ... */
+            ResolvingContext castedResolvingCtx = (ResolvingContext) bufferedValuesCtx;
+            fullCtx.putAllNew(castedResolvingCtx);
             fullCtx.putAllNew(initialCtx);
             return fullCtx;
-        }).map(ed.emptyOnException(
-                (ResolvingContext fullCtx) -> engine.resolveDetailed(rootExpression, fullCtx, EXCEPTION_HANDLING_STRATEGY)));
+        }).map(ed.emptyOnException((ResolvingContext fullCtx) -> engine.resolveDetailed(rootExpression, fullCtx,
+                EXCEPTION_HANDLING_STRATEGY)));
 
         @SuppressWarnings("unchecked") /* safe cast */
         Publisher<Optional<T>> castedResultStream = (Publisher<Optional<T>>) resultStream;
@@ -120,8 +122,7 @@ public class BufferedTensoricsExpressionStreamFactory implements StreamFactory {
             Set<OverlapBufferStreamId<?>> bufferedStreamIds) {
         return bufferedStreamIds.stream().map(streamId -> {
             Flowable<?> stream = Flowable.fromPublisher(discoveryService.discover(streamId));
-            Flowable<IdentifiedValue> identifiedStream = stream.map(value -> new IdentifiedValue(streamId, value));
-            return identifiedStream;
+            return stream.map(value -> new IdentifiedValue(streamId, value));
         }).collect(Collectors.toSet());
     }
 

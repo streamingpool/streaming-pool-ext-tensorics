@@ -35,7 +35,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 import org.reactivestreams.Publisher;
 import org.streamingpool.core.service.DiscoveryService;
 import org.streamingpool.core.service.StreamId;
@@ -123,6 +123,8 @@ public class TensoricsExpressionStreamFactoryTest {
     private static Expression<Double> mockExpression() {
 
         return new DoubleScript<Double>() {
+
+            private static final long serialVersionUID = 1L;
 
             @Override
             protected Expression<Double> describe() {
