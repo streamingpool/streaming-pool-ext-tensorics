@@ -26,8 +26,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.streamingpool.ext.tensorics.streamfactory.BufferedTensoricsExpressionStreamFactory;
 import org.streamingpool.ext.tensorics.streamfactory.DetailedTensoricsExpressionStreamFactory;
-import org.streamingpool.ext.tensorics.streamfactory.DiscreteFunctionStreamFactory;
-import org.streamingpool.ext.tensorics.streamfactory.TensoricsBufferedStreamFactory;
 import org.streamingpool.ext.tensorics.streamfactory.TensoricsExpressionStreamFactory;
 import org.tensorics.core.resolve.engine.ResolvingEngine;
 
@@ -51,13 +49,4 @@ public class TensoricsStreamingConfiguration {
         return new DetailedTensoricsExpressionStreamFactory(resolvingEngine);
     }
 
-    @Bean
-    public TensoricsBufferedStreamFactory tensoricsBufferedStreamFactory() {
-        return new TensoricsBufferedStreamFactory();
-    }
-
-    @Bean
-    public DiscreteFunctionStreamFactory discreteFunctionStreamFactory() {
-        return new DiscreteFunctionStreamFactory();
-    }
 }

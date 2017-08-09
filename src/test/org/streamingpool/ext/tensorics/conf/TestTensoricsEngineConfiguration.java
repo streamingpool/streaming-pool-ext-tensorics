@@ -22,24 +22,11 @@
 
 package org.streamingpool.ext.tensorics.conf;
 
-import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
-import org.tensorics.core.resolve.engine.ResolvingEngine;
-import org.tensorics.core.resolve.engine.ResolvingEngines;
-import org.tensorics.core.resolve.resolvers.IterableResolvingExpressionResolver;
-import org.tensorics.core.resolve.resolvers.PickResolver;
-import org.tensorics.core.resolve.resolvers.PredicateConditionResolver;
-import org.tensorics.core.resolve.resolvers.WindowedExpressionResolver;
 
 @Configuration
-@Import({ TensoricsStreamingConfiguration.class })
+@Import({ TensoricsStreamingConfiguration.class, DefaultResolvingEngineConfiguration.class })
 public class TestTensoricsEngineConfiguration {
-
-    @Bean
-    public ResolvingEngine createResolvingEngine() {
-        return ResolvingEngines.defaultEngineWithAdditional(new PredicateConditionResolver<>(),
-                new IterableResolvingExpressionResolver<>(), new WindowedExpressionResolver(), new PickResolver<>());
-    }
-
+    /* */
 }
