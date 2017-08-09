@@ -2,7 +2,7 @@
 /**
 *
 * This file is part of streaming pool (http://www.streamingpool.org).
-* 
+*
 * Copyright (c) 2017-present, CERN. All rights reserved.
 *
 * Licensed under the Apache License, Version 2.0 (the "License");
@@ -16,7 +16,7 @@
 * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 * See the License for the specific language governing permissions and
 * limitations under the License.
-* 
+*
 */
 // @formatter:on
 
@@ -32,6 +32,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.streamingpool.core.domain.ErrorStreamPair;
 import org.streamingpool.core.service.DiscoveryService;
 import org.streamingpool.core.service.StreamFactory;
@@ -70,6 +72,8 @@ import io.reactivex.functions.Function;
  */
 public class DetailedTensoricsExpressionStreamFactory implements StreamFactory {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(DetailedTensoricsExpressionStreamFactory.class);
+
     private static final HandleWithFirstCapableAncestorStrategy EXCEPTION_HANDLING_STRATEGY = new HandleWithFirstCapableAncestorStrategy();
 
     private static final Function<Object[], Boolean> TRIGGER_CONTEXT_COMBINER = (Object... entriesToCombine) -> true;
@@ -105,7 +109,7 @@ public class DetailedTensoricsExpressionStreamFactory implements StreamFactory {
                 .resolvedValueOf(Placeholder.ofClass(EvaluationStrategy.class)) instanceof BufferedEvaluation) {
             return ErrorStreamPair.empty();
         }
-        
+
         return ErrorStreamPair.ofData((Flowable<T>) resolvedStream(tensoricsId, discoveryService));
     }
 
@@ -167,7 +171,12 @@ public class DetailedTensoricsExpressionStreamFactory implements StreamFactory {
     private static Flowable<?> triggerObservable(Multimap<StreamId<?>, ? extends Flowable<?>> flowables,
             EvaluationStrategy strategy, DiscoveryService discoveryService) {
         if (strategy instanceof ContinuousEvaluation) {
-            return Flowable.combineLatest(flowables.values(), TRIGGER_CONTEXT_COMBINER);
+            Collection<? extends Flowable<?>> streams = flowables.values();
+            if (streams.isEmpty()) {
+                LOGGER.warn("The expression does not contain any streams. "
+                        + "Therefore it will never emit! This rarely might be what you want ;-)");
+            }
+            return Flowable.combineLatest(streams, TRIGGER_CONTEXT_COMBINER);
         }
         if (strategy instanceof BufferedEvaluation) {
             List<? extends Flowable<?>> triggeringObservables = flowables.entries().stream()
