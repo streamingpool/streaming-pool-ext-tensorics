@@ -34,6 +34,7 @@ import org.tensorics.core.resolve.domain.DetailedExpressionResult;
 
 /**
  * @author kfuchsbe, caguiler
+ * @see ExpressionBasedStreamId
  */
 public class TensoricsExpressionStreamFactory implements StreamFactory {
 
@@ -43,7 +44,8 @@ public class TensoricsExpressionStreamFactory implements StreamFactory {
             return ErrorStreamPair.empty();
         }
         ExpressionBasedStreamId<Y> expressionBasedId = (ExpressionBasedStreamId<Y>) id;
-        DetailedExpressionStreamId<Y, ?> expression = expressionBasedId.getDetailedId();
+        DetailedExpressionStreamId<Y, ?> expression = DetailedExpressionStreamId.of(expressionBasedId.expression(),
+                expressionBasedId.initialContext(), expressionBasedId.evaluationStrategy());
         return ErrorStreamPair
                 .ofData(fromPublisher(discoveryService.discover(expression)).map(DetailedExpressionResult::value));
     }

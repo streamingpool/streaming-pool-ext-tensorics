@@ -5,6 +5,7 @@
 package org.streamingpool.ext.tensorics.streamfactory;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.tensorics.core.tree.domain.Contexts.newResolvingContext;
 
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -132,13 +133,10 @@ public class BufferedTensoricsExpressionStreamFactoryStreamTest extends Abstract
         BufferedEvaluation evaluationStrategy = (BufferedEvaluation) BufferedEvaluation.builder()
                 .withStartStreamId(startStreamId).withEndMatcher(EndStreamMatcher.endingOnEquals(endStreamId)).build();
 
-        EditableResolvingContext ctx = Contexts.newResolvingContext();
-        ctx.put(Placeholder.ofClass(EvaluationStrategy.class), evaluationStrategy);
-
         BufferedStreamExpression<Integer> bufferedExpression = BufferedStreamExpression.buffer(sourceStreamId);
 
         DetailedExpressionStreamId<List<Integer>, BufferedStreamExpression<Integer>> rootStreamId = DetailedExpressionStreamId
-                .of(bufferedExpression, ctx);
+                .of(bufferedExpression, newResolvingContext(), evaluationStrategy);
 
         return rxFrom(rootStreamId).test();
     }

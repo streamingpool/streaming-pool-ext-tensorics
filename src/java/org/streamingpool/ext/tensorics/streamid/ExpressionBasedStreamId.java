@@ -23,11 +23,17 @@
 package org.streamingpool.ext.tensorics.streamid;
 
 import static java.util.Objects.requireNonNull;
+import static org.streamingpool.ext.tensorics.evaluation.EvaluationStrategies.defaultEvaluation;
+import static org.tensorics.core.tree.domain.Contexts.newResolvingContext;
 
 import java.io.Serializable;
 
 import org.streamingpool.core.service.StreamId;
+import org.streamingpool.ext.tensorics.evaluation.EvaluationStrategy;
+import org.streamingpool.ext.tensorics.streamfactory.TensoricsExpressionStreamFactory;
+import org.tensorics.core.expressions.Placeholder;
 import org.tensorics.core.tree.domain.Expression;
+import org.tensorics.core.tree.domain.ResolvingContext;
 
 /**
  * A stream id backed by a tensorics expression. It can be used to request a stream of the expression (resolved) from
@@ -35,29 +41,56 @@ import org.tensorics.core.tree.domain.Expression;
  *
  * @author kfuchsbe, caguiler
  * @param <R> the return type of the expression (and thus the type of the elements of the resulting stream)
+ * @see TensoricsExpressionStreamFactory
  */
 public class ExpressionBasedStreamId<R> implements StreamId<R>, Serializable {
     private static final long serialVersionUID = 1L;
 
-    private final DetailedExpressionStreamId<R, ?> expression;
+    private final Expression<R> expression;
+    private final ResolvingContext initialContext;
+    private final EvaluationStrategy evaluationStrategy;
 
-    private ExpressionBasedStreamId(Expression<R> expression) {
-        this.expression = DetailedExpressionStreamId.of(requireNonNull(expression, "expression must not be null."));
+    public static <R> ExpressionBasedStreamId<R> of(Expression<R> expression, ResolvingContext initialContext,
+            EvaluationStrategy evaluationStrategy) {
+        return new ExpressionBasedStreamId<>(expression, initialContext, evaluationStrategy);
     }
 
     public static <R> ExpressionBasedStreamId<R> of(Expression<R> expression) {
-        return new ExpressionBasedStreamId<>(expression);
+        return new ExpressionBasedStreamId<>(expression, newResolvingContext(), defaultEvaluation());
     }
 
-    public DetailedExpressionStreamId<R, ?> getDetailedId() {
+    private ExpressionBasedStreamId(Expression<R> expression, ResolvingContext initialContext,
+            EvaluationStrategy evaluationStrategy) {
+        this.expression = requireNonNull(expression, "expression must not be null.");
+        this.initialContext = requireNonNull(initialContext, "initialContext must not be null.");
+        this.evaluationStrategy = requireNonNull(evaluationStrategy, "evaluationStrategy must not be null");
+
+        if (initialContext.resolves(Placeholder.ofClass(EvaluationStrategy.class))) {
+            throw new IllegalArgumentException(
+                    "The initial context already provides an EvaluationStrategy. This is not allowed, use the parameter");
+        }
+    }
+
+    public ResolvingContext initialContext() {
+        return initialContext;
+    }
+
+    public Expression<R> expression() {
         return expression;
+    }
+    
+
+    public EvaluationStrategy evaluationStrategy() {
+        return evaluationStrategy;
     }
 
     @Override
     public int hashCode() {
         final int prime = 31;
         int result = 1;
+        result = prime * result + ((evaluationStrategy == null) ? 0 : evaluationStrategy.hashCode());
         result = prime * result + ((expression == null) ? 0 : expression.hashCode());
+        result = prime * result + ((initialContext == null) ? 0 : initialContext.hashCode());
         return result;
     }
 
@@ -73,6 +106,13 @@ public class ExpressionBasedStreamId<R> implements StreamId<R>, Serializable {
             return false;
         }
         ExpressionBasedStreamId<?> other = (ExpressionBasedStreamId<?>) obj;
+        if (evaluationStrategy == null) {
+            if (other.evaluationStrategy != null) {
+                return false;
+            }
+        } else if (!evaluationStrategy.equals(other.evaluationStrategy)) {
+            return false;
+        }
         if (expression == null) {
             if (other.expression != null) {
                 return false;
@@ -80,12 +120,22 @@ public class ExpressionBasedStreamId<R> implements StreamId<R>, Serializable {
         } else if (!expression.equals(other.expression)) {
             return false;
         }
+        if (initialContext == null) {
+            if (other.initialContext != null) {
+                return false;
+            }
+        } else if (!initialContext.equals(other.initialContext)) {
+            return false;
+        }
         return true;
     }
 
     @Override
     public String toString() {
-        return "ExpressionBasedStreamId [expression=" + expression + "]";
+        return "ExpressionBasedStreamId [expression=" + expression + ", evaluationStrategy=" + evaluationStrategy
+                + ", initialContext=" + initialContext + "]";
     }
+
+    
 
 }

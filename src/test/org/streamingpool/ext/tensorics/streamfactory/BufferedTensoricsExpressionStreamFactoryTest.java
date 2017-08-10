@@ -9,6 +9,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.streamingpool.ext.tensorics.expression.BufferedStreamExpression.buffer;
 import static org.tensorics.core.lang.TensoricExpressions.use;
+import static org.tensorics.core.tree.domain.Contexts.newResolvingContext;
 
 import java.util.Collections;
 
@@ -81,15 +82,18 @@ public class BufferedTensoricsExpressionStreamFactoryTest {
 
     @Test(expected = IllegalArgumentException.class)
     public void testNoBufferedExpressions() {
-        EditableResolvingContext ctx = Contexts.newResolvingContext();
-        ctx.put(Placeholder.ofClass(EvaluationStrategy.class), mock(BufferedEvaluation.class));
-        factory.create(DetailedExpressionStreamId.of(ResolvedExpression.of("any"), ctx), mock(DiscoveryService.class));
+        BufferedEvaluation evaluationStrategy = mock(BufferedEvaluation.class);
+        factory.create(
+                DetailedExpressionStreamId.of(ResolvedExpression.of("any"), newResolvingContext(), evaluationStrategy),
+                mock(DiscoveryService.class));
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void testNoPlaceholderForEvaluationStrategy() {
-        DetailedExpressionStreamId<?, ?> streamId = DetailedExpressionStreamId.of(mockExpression(),
-                Contexts.newResolvingContext());
+    public void testPlaceholderForEvaluationStrategyThrows() {
+        EditableResolvingContext ctx = Contexts.newResolvingContext();
+        ctx.put(Placeholder.ofClass(EvaluationStrategy.class), mock(EvaluationStrategy.class));
+        DetailedExpressionStreamId<?, ?> streamId = DetailedExpressionStreamId.of(mockExpression(), ctx,
+                mock(EvaluationStrategy.class));
         factory.create(streamId, mock(DiscoveryService.class));
     }
 

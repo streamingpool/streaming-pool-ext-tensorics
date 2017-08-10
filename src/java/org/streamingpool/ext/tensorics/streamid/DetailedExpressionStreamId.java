@@ -23,11 +23,11 @@
 package org.streamingpool.ext.tensorics.streamid;
 
 import static java.util.Objects.requireNonNull;
+import static org.tensorics.core.tree.domain.Contexts.mergeContextsOrdered;
 
 import java.io.Serializable;
 
 import org.streamingpool.core.service.StreamId;
-import org.streamingpool.ext.tensorics.evaluation.EvaluationStrategies;
 import org.streamingpool.ext.tensorics.evaluation.EvaluationStrategy;
 import org.tensorics.core.expressions.Placeholder;
 import org.tensorics.core.resolve.domain.DetailedExpressionResult;
@@ -55,19 +55,17 @@ public class DetailedExpressionStreamId<R, E extends Expression<R>>
         this.expression = requireNonNull(expression, "expression must not be null.");
     }
 
-    public static <R, E extends Expression<R>> DetailedExpressionStreamId<R, E> of(E expression) {
-        EditableResolvingContext initialCtx = Contexts.newResolvingContext();
-        initialCtx.put(Placeholder.ofClass(EvaluationStrategy.class), EvaluationStrategies.defaultEvaluation());
-        return of(expression, initialCtx);
-    }
-
     public static <R, E extends Expression<R>> DetailedExpressionStreamId<R, E> of(E expression,
-            ResolvingContext initialCtx) {
-        if (!initialCtx.resolves(Placeholder.ofClass(EvaluationStrategy.class))) {
+            ResolvingContext initialCtx, EvaluationStrategy evaluationStrategy) {
+
+        EditableResolvingContext resolvingContext = Contexts.newResolvingContext();
+        resolvingContext.put(Placeholder.ofClass(EvaluationStrategy.class), evaluationStrategy);
+
+        if (initialCtx.resolves(Placeholder.ofClass(EvaluationStrategy.class))) {
             throw new IllegalArgumentException(
-                    "The initial context does not provide a value for a placeholder of EvaluationStrategy");
+                    "The initial context already provides an EvaluationStrategy. This is not allowed, use the parameter");
         }
-        return new DetailedExpressionStreamId<>(expression, initialCtx);
+        return new DetailedExpressionStreamId<>(expression, mergeContextsOrdered(resolvingContext, initialCtx));
     }
 
     public E expression() {

@@ -43,6 +43,13 @@ import com.google.common.collect.Multimap;
 
 import io.reactivex.Flowable;
 
+/**
+ * {@link StreamFactory} that creates {@link DetailedExpressionStreamId}s with {@link BufferedEvaluation} as
+ * {@link EvaluationStrategy}.
+ * 
+ * @author acalia
+ * @see DetailedExpressionStreamId
+ */
 public class BufferedTensoricsExpressionStreamFactory implements StreamFactory {
 
     private static final HandleWithFirstCapableAncestorStrategy EXCEPTION_HANDLING_STRATEGY = new HandleWithFirstCapableAncestorStrategy();
@@ -106,7 +113,7 @@ public class BufferedTensoricsExpressionStreamFactory implements StreamFactory {
             fullCtx.putAllNew(initialCtx);
             return fullCtx;
         }).map(ed.emptyOnException((ResolvingContext fullCtx) -> engine.resolveDetailed(rootExpression, fullCtx,
-                EXCEPTION_HANDLING_STRATEGY)));
+                EXCEPTION_HANDLING_STRATEGY))).share();
 
         @SuppressWarnings("unchecked") /* safe cast */
         Publisher<Optional<T>> castedResultStream = (Publisher<Optional<T>>) resultStream;

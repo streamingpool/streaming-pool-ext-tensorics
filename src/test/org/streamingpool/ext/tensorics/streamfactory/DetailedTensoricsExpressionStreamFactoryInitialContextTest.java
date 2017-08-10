@@ -28,6 +28,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
 import static org.streamingpool.ext.tensorics.evaluation.TriggeredEvaluation.triggeredBy;
 import static org.streamingpool.ext.tensorics.streamid.DetailedExpressionStreamId.of;
+import static org.tensorics.core.tree.domain.Contexts.newResolvingContext;
 
 import java.util.Collections;
 import java.util.List;
@@ -44,9 +45,7 @@ import org.streamingpool.core.service.StreamId;
 import org.streamingpool.core.support.AbstractStreamSupport;
 import org.streamingpool.core.support.RxStreamSupport;
 import org.streamingpool.ext.tensorics.conf.TestTensoricsEngineConfiguration;
-import org.streamingpool.ext.tensorics.evaluation.EvaluationStrategy;
 import org.streamingpool.ext.tensorics.evaluation.TriggeredEvaluation;
-import org.tensorics.core.expressions.Placeholder;
 import org.tensorics.core.resolve.domain.DetailedExpressionResult;
 import org.tensorics.core.tree.domain.AbstractDeferredExpression;
 import org.tensorics.core.tree.domain.Contexts;
@@ -70,11 +69,8 @@ public class DetailedTensoricsExpressionStreamFactoryInitialContextTest extends 
         Expression<String> expression = unresolvedLeafExpression();
 
         TriggeredEvaluation evaluationStrategy = triggeredBy(triggerStreamId);
-        EditableResolvingContext initialCtx = Contexts.newResolvingContext();
-        initialCtx.put(Placeholder.ofClass(EvaluationStrategy.class), evaluationStrategy);
-
         TestSubscriber<DetailedExpressionResult<String, Expression<String>>> subscriber = new TestSubscriber<>();
-        rxFrom(of(expression, initialCtx)).subscribe(subscriber);
+        rxFrom(of(expression, newResolvingContext(), evaluationStrategy)).subscribe(subscriber);
         subscriber.awaitTerminalEvent();
 
         assertThat(subscriber.errors()).hasSize(1);
@@ -90,10 +86,9 @@ public class DetailedTensoricsExpressionStreamFactoryInitialContextTest extends 
 
         EditableResolvingContext initialCtx = Contexts.newResolvingContext();
         initialCtx.put(expression, ANY_STRING);
-        initialCtx.put(Placeholder.ofClass(EvaluationStrategy.class), evaluationStrategy);
 
         DetailedExpressionResult<String, Expression<String>> detailedResult = syncGetFirstValueOf(
-                of(expression, initialCtx));
+                of(expression, initialCtx, evaluationStrategy));
 
         assertThat(detailedResult.value()).isEqualTo(ANY_STRING);
     }

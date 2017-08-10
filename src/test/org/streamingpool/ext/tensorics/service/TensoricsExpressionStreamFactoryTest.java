@@ -27,6 +27,8 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+import static org.streamingpool.ext.tensorics.evaluation.EvaluationStrategies.defaultEvaluation;
+import static org.tensorics.core.tree.domain.Contexts.newResolvingContext;
 
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -78,7 +80,7 @@ public class TensoricsExpressionStreamFactoryTest {
     @Before
     public void setUp() {
         factoryUnderTest = new DetailedTensoricsExpressionStreamFactory(ResolvingEngines.defaultEngine());
-        expressionBasedStreamId = DetailedExpressionStreamId.of(A_PLUS_B);
+        expressionBasedStreamId = DetailedExpressionStreamId.of(A_PLUS_B, newResolvingContext(),defaultEvaluation());
 
         mockStream1();
         mockStream2();
