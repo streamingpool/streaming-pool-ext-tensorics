@@ -70,7 +70,7 @@ import io.reactivex.functions.Function;
 /**
  * {@link StreamFactory} that creates {@link DetailedExpressionStreamId}s with {@link ContinuousEvaluation} and
  * {@link TriggeredEvaluation} as {@link EvaluationStrategy}.
- * 
+ *
  * @author acalia
  */
 public class DetailedTensoricsExpressionStreamFactory implements StreamFactory {
