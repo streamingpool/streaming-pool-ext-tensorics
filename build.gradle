@@ -75,16 +75,16 @@ dependencies {
 
     compile 'org.tensorics:tensorics-core:0.+'
 
-    compile 'org.springframework:spring-core:4.3.13.RELEASE'
-    compile 'org.springframework:spring-context:4.3.13.RELEASE'
-    testCompile 'org.springframework:spring-test:4.3.13.RELEASE'
+    compile 'org.springframework:spring-core:5.1.2.RELEASE'
+    compile 'org.springframework:spring-context:5.1.2.RELEASE'
+    testCompile 'org.springframework:spring-test:5.1.2.RELEASE'
 
     compile 'org.slf4j:slf4j-api:1.7.25'
 
     compile 'org.apache.commons:commons-lang3:3.7'
 
     testCompile 'junit:junit:4.12'
-    testCompile 'org.mockito:mockito-core:2.8.+'
+    testCompile 'org.mockito:mockito-core:2.23.+'
     testCompile 'org.assertj:assertj-core:3.8.+'
     testCompile 'pl.pragmatists:JUnitParams:1.1.0'
     testCompile 'com.openpojo:openpojo:0.8.10'
